@@ -1,7 +1,7 @@
 //Types allowed for ItemStatus
 export type ListingStatus = "available"|"reserved"|"sold";
 
-//All the items to sell or buy
+//All the Listings to sell or buy
 export interface Listing  {
     
     "id": string,
