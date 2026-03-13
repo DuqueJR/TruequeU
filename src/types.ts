@@ -1,25 +1,22 @@
-
-
 //Types allowed for ItemStatus
-
-export type ItemStatus = "available"|"reserved"|"sold";
-
-
-
-
-
-
+export type ListingStatus = "available"|"reserved"|"sold";
 
 //All the items to sell or buy
-export interface Item  {
+export interface Listing  {
     
-    "id": number,
+    "id": string,
     "title": string,
     "description": string,
     "price": number,
     "category": string,
-    "status": ItemStatus,
+    "status": ListingStatus,
     "images": string[],
-    "ownerId": number,
+    "ownerId": string,
     "isFavorite": boolean 
+}
+
+export interface User {
+  id: string;
+  email: string;
+  name: string;
 }
