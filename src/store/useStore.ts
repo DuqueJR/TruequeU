@@ -1,7 +1,10 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { Listing, User } from '../types.ts';
+import { create } from 'zustand'; //Importar la funcion de crear el store global 
+import { persist } from 'zustand/middleware'; //Agrega persisitencia autoamticamete 
+import type { Listing, User } from '../types.ts'; //Importa tipos 
 
+
+//Es un estado de la tienda 
+//Id d
 interface StoreState {
   listings: Listing[];
   user: User | null;

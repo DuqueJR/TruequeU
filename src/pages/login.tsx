@@ -1,1 +1,5 @@
-export default function LoginPage() {}
+export default function LoginPage() {
+    return(
+        <h1></h1>
+    )
+}
