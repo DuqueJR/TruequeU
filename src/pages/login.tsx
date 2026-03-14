@@ -1,14 +1,25 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useStore } from "../store/useStore";
+import { validateLogin } from "../services/auth.service";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+  const login = useStore((state) => state.login);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Iniciando sesión con:", { email, password });
-    // Aquí iría tu lógica de autenticación con Zustand
+    setError("");
+    const user = validateLogin(email, password);
+    if (user) {
+      login(user);
+      navigate("/");
+    } else {
+      setError("Email o contraseña incorrectos. Regístrate si no tienes cuenta.");
+    }
   };
 
   return (
@@ -28,6 +39,9 @@ export default function LoginPage() {
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <p className="text-red-400 text-sm bg-red-500/10 px-4 py-2 rounded-xl">{error}</p>
+            )}
             {/* Email */}
             <div>
               <label className="block text-xs font-bold text-slate-400 uppercase tracking-widest mb-2 ml-1">
@@ -93,6 +107,9 @@ export default function LoginPage() {
           <Link to="/signup" className="text-white font-bold hover:text-indigo-400 transition-colors underline underline-offset-4">
             Create one now
           </Link>
+        </p>
+        <p className="text-center mt-2 text-slate-500 text-xs">
+          Ej: juan.perez@eia.edu.co / Juan123!
         </p>
       </div>
     </div>

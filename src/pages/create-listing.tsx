@@ -1,9 +1,13 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
+import { useStore } from "../store/useStore";
+import { validateListing } from "../services/listing.service";
 
 export default function CreateListingPage() {
   const navigate = useNavigate();
-  const [dragActive, setDragActive] = useState(false);
+  const user = useStore((state) => state.user);
+  const addListing = useStore((state) => state.addListing);
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     title: "",
     price: "",
@@ -15,9 +19,9 @@ export default function CreateListingPage() {
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setError("");
   };
 
-  // Simulación de carga de imagen
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -29,10 +33,42 @@ export default function CreateListingPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Publicando producto:", formData);
-    // Aquí iría la lógica para guardar en tu array local o base de datos
+    if (!user) return;
+    setError("");
+    const validation = validateListing({
+      title: formData.title,
+      description: formData.description,
+      price: formData.price,
+    });
+    if (!validation.valid) {
+      setError(validation.message);
+      return;
+    }
+    const listing = {
+      id: `listing-${Date.now()}`,
+      title: formData.title,
+      description: formData.description,
+      price: Number(formData.price),
+      category: formData.category,
+      status: "available" as const,
+      images: formData.image ? [formData.image] : ["https://via.placeholder.com/400"],
+      ownerId: user.id,
+      isFavorite: false,
+    };
+    addListing(listing);
     navigate("/");
   };
+
+  if (!user) {
+    return (
+      <div className="flex-1 flex items-center justify-center px-6 py-12">
+        <div className="text-center">
+          <p className="text-slate-400 mb-4">Debes iniciar sesión para crear un listing.</p>
+          <Link to="/login" className="text-indigo-400 font-bold hover:text-indigo-300">Iniciar sesión</Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 px-6 py-10">
@@ -45,7 +81,11 @@ export default function CreateListingPage() {
         </header>
 
         <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          
+          {error && (
+            <div className="lg:col-span-5">
+              <p className="text-red-400 text-sm bg-red-500/10 px-4 py-2 rounded-xl">{error}</p>
+            </div>
+          )}
           {/* COLUMNA IZQUIERDA: Formulario (3/5) */}
           <div className="lg:col-span-3 space-y-6">
             <div className="bg-[#1e293b]/40 backdrop-blur-xl border border-slate-800 p-8 rounded-[2.5rem] shadow-2xl space-y-5">
@@ -56,6 +96,9 @@ export default function CreateListingPage() {
                 <input
                   name="title"
                   required
+                  minLength={3}
+                  maxLength={100}
+                  value={formData.title}
                   onChange={handleChange}
                   className="w-full bg-slate-900/60 border border-slate-700 text-white rounded-2xl px-4 py-3.5 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none transition-all"
                   placeholder="Example: Calculus Stewart 8th Edition"
@@ -70,10 +113,15 @@ export default function CreateListingPage() {
                     name="price"
                     type="number"
                     required
+                    min={0}
+                    max={999999}
+                    step="0.01"
+                    value={formData.price}
                     onChange={handleChange}
                     className="w-full bg-slate-900/60 border border-slate-700 text-white rounded-2xl px-4 py-3.5 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none transition-all"
                     placeholder="0.00"
                   />
+                  <p className="text-slate-500 text-[10px] mt-1 ml-1">Mín. $0, máx. $999,999</p>
                 </div>
                 {/* Categoría */}
                 <div>
@@ -98,6 +146,9 @@ export default function CreateListingPage() {
                   name="description"
                   rows={4}
                   required
+                  minLength={10}
+                  maxLength={1000}
+                  value={formData.description}
                   onChange={handleChange}
                   className="w-full bg-slate-900/60 border border-slate-700 text-white rounded-2xl px-4 py-3.5 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none transition-all resize-none"
                   placeholder="Describe the condition, reasons for trading, etc."

@@ -1,123 +1,188 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
+import { useStore } from "../store/useStore";
+import { users } from "../data/users";
+import { Items } from "../data/items";
 
 export default function ChatPage() {
-  const { id } = useParams(); // ID del listing o de la conversación
+  const { chatId } = useParams();
+  const currentUser = useStore((state) => state.user);
+  const chats = useStore((state) => state.chats);
+  const getOrCreateChat = useStore((state) => state.getOrCreateChat);
+  const addChatMessage = useStore((state) => state.addChatMessage);
+
   const [newMessage, setNewMessage] = useState("");
 
-  // Mock de mensajes
-  const [messages, setMessages] = useState([
-    { id: 1, sender: "other", text: "¡Hola! Vi tu iPad, ¿aún está disponible?", time: "10:30 AM" },
-    { id: 2, sender: "me", text: "¡Hola! Sí, todavía lo tengo. ¿Te interesa para trueque o compra?", time: "10:32 AM" },
-    { id: 3, sender: "other", text: "Tengo una MacBook Air M1 que podría darte como parte de pago. ¿Te interesa?", time: "10:35 AM" },
-  ]);
+  const storeListings = useStore((state) => state.listings);
+  const allListings = [...Items, ...storeListings];
+
+  useEffect(() => {
+    if (!chatId || !currentUser) return;
+    if (chats[chatId]) return;
+    const idx = chatId.lastIndexOf("-");
+    if (idx === -1) return;
+    const listingId = chatId.slice(0, idx);
+    const buyerId = chatId.slice(idx + 1);
+    const listing = allListings.find((l) => l.id === listingId);
+    if (listing && buyerId === currentUser.id) {
+      getOrCreateChat(listing.id, listing.title, listing.ownerId, buyerId);
+    }
+  }, [chatId, currentUser, allListings, chats, getOrCreateChat]);
+
+  const myChats = Object.values(chats).filter(
+    (c) => c.sellerId === currentUser?.id || c.buyerId === currentUser?.id
+  );
+
+  const getPartner = (chat: (typeof myChats)[0]) => {
+    const partnerId = chat.sellerId === currentUser?.id ? chat.buyerId : chat.sellerId;
+    return users.find((u) => u.id === partnerId);
+  };
+
+  const activeChat = chatId ? chats[chatId] : null;
+  const partner = activeChat ? getPartner(activeChat) : null;
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newMessage.trim()) return;
-    
-    setMessages([...messages, {
-      id: messages.length + 1,
-      sender: "me",
-      text: newMessage,
-      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-    }]);
+    if (!newMessage.trim() || !currentUser || !chatId) return;
+    addChatMessage(chatId, currentUser.id, newMessage.trim());
     setNewMessage("");
   };
 
+  if (!currentUser) {
+    return (
+      <div className="flex-1 flex items-center justify-center px-6 py-12">
+        <div className="text-center">
+          <p className="text-slate-400 mb-4">Inicia sesión para ver tus chats.</p>
+          <Link to="/login" className="text-indigo-400 font-bold hover:text-indigo-300">
+            Iniciar sesión
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex-1 flex flex-col md:flex-row h-[calc(100vh-73px)] overflow-hidden bg-[#0f172a]">
-      
-      {/* SIDEBAR: Lista de Chats (Oculto en móvil si hay un chat abierto) */}
-      <aside className="w-full md:w-80 border-r border-slate-800 flex flex-col bg-slate-900/20">
+      {/* Sidebar: Lista de chats */}
+      <aside className="w-full md:w-80 border-r border-slate-800 flex flex-col bg-slate-900/20 shrink-0">
         <div className="p-6 border-b border-slate-800">
-          <h2 className="text-xl font-black text-white tracking-tighter">Messages</h2>
+          <h2 className="text-xl font-black text-white tracking-tighter">Mensajes</h2>
         </div>
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
-          {/* Item de Chat Activo */}
-          <div className="p-4 rounded-2xl bg-indigo-600/20 border border-indigo-500/50 cursor-pointer">
-            <div className="flex items-center gap-3">
-              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Camilo" className="w-10 h-10 rounded-full bg-slate-800" />
-              <div className="flex-1 min-w-0">
-                <p className="text-white font-bold truncate text-sm">Camilo Andres</p>
-                <p className="text-indigo-300 text-xs truncate italic">iPad Pro 12.9 M2...</p>
-              </div>
-            </div>
-          </div>
-          {/* Otros chats mock */}
-          <div className="p-4 rounded-2xl hover:bg-slate-800/50 transition-colors cursor-pointer group">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-500 font-bold text-xs uppercase">ML</div>
-              <div className="flex-1 min-w-0">
-                <p className="text-slate-300 font-bold truncate text-sm group-hover:text-white transition-colors">Maria Lopez</p>
-                <p className="text-slate-500 text-xs truncate">¿Sigue disponible el libro?</p>
-              </div>
-            </div>
-          </div>
+          {myChats.length === 0 ? (
+            <p className="text-slate-500 text-sm p-4">
+              No tienes conversaciones. Contacta a un vendedor desde un listing.
+            </p>
+          ) : (
+            myChats.map((chat) => {
+              const p = getPartner(chat);
+              const lastMsg = chat.messages[chat.messages.length - 1];
+              const isActive = chatId === chat.id;
+              return (
+                <Link
+                  key={chat.id}
+                  to={`/chat/${chat.id}`}
+                  className={`block p-4 rounded-2xl transition-colors ${
+                    isActive ? "bg-indigo-600/20 border border-indigo-500/50" : "hover:bg-slate-800/50"
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <img
+                      src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${p?.id || "unknown"}`}
+                      className="w-10 h-10 rounded-full bg-slate-800"
+                      alt=""
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-white font-bold truncate text-sm">{p?.name || "Usuario"}</p>
+                      <p className="text-slate-400 text-xs truncate">
+                        {lastMsg ? lastMsg.text : chat.listingTitle}
+                      </p>
+                    </div>
+                  </div>
+                </Link>
+              );
+            })
+          )}
         </div>
       </aside>
 
-      {/* ÁREA DE CHAT PRINCIPAL */}
-      <main className="flex-1 flex flex-col relative">
-        {/* Header del Chat */}
-        <header className="p-4 border-b border-slate-800 bg-[#1e293b]/30 backdrop-blur-md flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <Link to="/profile/camilo" className="flex items-center gap-3">
-              <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=Camilo" className="w-10 h-10 rounded-full border border-slate-700" />
-              <div>
-                <h3 className="text-white font-bold text-sm">Camilo Andres</h3>
-                <p className="text-green-500 text-[10px] uppercase font-black tracking-widest">Online</p>
+      {/* Área de chat */}
+      <main className="flex-1 flex flex-col min-w-0">
+        {activeChat && partner ? (
+          <>
+            <header className="p-4 border-b border-slate-800 bg-[#1e293b]/30 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-3">
+                <img
+                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${partner.id}`}
+                  className="w-10 h-10 rounded-full border border-slate-700"
+                  alt=""
+                />
+                <div>
+                  <h3 className="text-white font-bold text-sm">{partner.name}</h3>
+                  <p className="text-slate-500 text-xs">{activeChat.listingTitle}</p>
+                </div>
               </div>
-            </Link>
-          </div>
-          <Link to={`/listing/${id}`} className="text-xs text-indigo-400 hover:text-indigo-300 font-bold border border-indigo-500/30 px-3 py-1.5 rounded-lg">
-            View Item
-          </Link>
-        </header>
+              <Link
+                to={`/listing/${activeChat.listingId}`}
+                className="text-xs text-indigo-400 hover:text-indigo-300 font-bold border border-indigo-500/30 px-3 py-1.5 rounded-lg"
+              >
+                Ver listing
+              </Link>
+            </header>
 
-        {/* Mensajes */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]">
-          {messages.map((msg) => (
-            <div key={msg.id} className={`flex ${msg.sender === "me" ? "justify-end" : "justify-start"}`}>
-              <div className={`max-w-[70%] p-4 rounded-2xl shadow-xl ${
-                msg.sender === "me" 
-                  ? "bg-indigo-600 text-white rounded-tr-none" 
-                  : "bg-slate-800 text-slate-200 rounded-tl-none border border-slate-700"
-              }`}>
-                <p className="text-sm leading-relaxed">{msg.text}</p>
-                <p className={`text-[10px] mt-2 opacity-60 ${msg.sender === "me" ? "text-right" : "text-left"}`}>
-                  {msg.time}
+            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-[#0f172a]">
+              {activeChat.messages.length === 0 ? (
+                <p className="text-slate-500 text-sm text-center py-8">
+                  Envía un mensaje para iniciar la conversación.
                 </p>
-              </div>
+              ) : (
+                activeChat.messages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={`flex ${msg.senderId === currentUser.id ? "justify-end" : "justify-start"}`}
+                  >
+                    <div
+                      className={`max-w-[70%] p-4 rounded-2xl shadow-xl ${
+                        msg.senderId === currentUser.id
+                          ? "bg-indigo-600 text-white rounded-tr-none"
+                          : "bg-slate-800 text-slate-200 rounded-tl-none border border-slate-700"
+                      }`}
+                    >
+                      <p className="text-sm leading-relaxed">{msg.text}</p>
+                      <p className="text-[10px] mt-2 opacity-60">{msg.time}</p>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
-          ))}
-        </div>
 
-        {/* Input de Mensaje */}
-        <footer className="p-4 bg-slate-900/50 backdrop-blur-xl border-t border-slate-800">
-          <form onSubmit={handleSendMessage} className="max-w-4xl mx-auto flex gap-3">
-            <button type="button" className="p-3 text-slate-500 hover:text-white transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-              </svg>
-            </button>
-            <input 
-              type="text"
-              value={newMessage}
-              onChange={(e) => setNewMessage(e.target.value)}
-              placeholder="Escribe un mensaje para negociar..."
-              className="flex-1 bg-slate-800 border border-slate-700 text-white rounded-2xl px-6 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/50 transition-all"
-            />
-            <button 
-              type="submit"
-              className="bg-indigo-600 hover:bg-indigo-500 text-white p-3 rounded-2xl shadow-lg shadow-indigo-500/20 transition-all active:scale-90"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-              </svg>
-            </button>
-          </form>
-        </footer>
+            <footer className="p-4 bg-slate-900/50 border-t border-slate-800 shrink-0">
+              <form onSubmit={handleSendMessage} className="max-w-4xl mx-auto flex gap-3">
+                <input
+                  type="text"
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  placeholder="Escribe un mensaje..."
+                  className="flex-1 bg-slate-800 border border-slate-700 text-white rounded-2xl px-6 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                />
+                <button
+                  type="submit"
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-2xl font-bold transition-all"
+                >
+                  Enviar
+                </button>
+              </form>
+            </footer>
+          </>
+        ) : (
+          <div className="flex-1 flex items-center justify-center text-slate-500">
+            {chatId ? (
+              <p>Chat no encontrado.</p>
+            ) : (
+              <p>Selecciona una conversación o contacta a un vendedor.</p>
+            )}
+          </div>
+        )}
       </main>
     </div>
   );

@@ -2,14 +2,35 @@ import { useParams, Link } from "react-router-dom";
 import { useState } from "react";
 import { useStore } from "../store/useStore";
 import { Items } from "../data/items";
+import { users } from "../data/users";
 
 export default function ListingDetailsPage() {
   const { id } = useParams();
+  const user = useStore((state) => state.user);
   const storeListings = useStore((state) => state.listings);
-  const allListings = storeListings.length > 0 ? storeListings : Items;
+  const allListings = [...Items, ...storeListings];
   const foundListing = allListings.find((l) => l.id === id);
 
   const [activeImage, setActiveImage] = useState(0);
+
+  // Obtener el vendedor desde users por ownerId
+  const seller = foundListing
+    ? users.find((u) => u.id === foundListing.ownerId)
+    : null;
+
+  const sellerDisplay = seller
+    ? {
+        name: seller.name,
+        email: seller.email,
+        campus: seller.email.split("@")[1] || "University",
+        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${seller.id}`,
+      }
+    : {
+        name: "Unknown",
+        email: "",
+        campus: "—",
+        avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=unknown",
+      };
 
   // Mock de datos si no se encuentra el listing (fallback)
   const defaultListing = {
@@ -23,12 +44,6 @@ export default function ListingDetailsPage() {
     ],
     category: "Electronics",
     condition: "Like New",
-    owner: {
-      name: "Camilo Andres",
-      major: "Industrial Design",
-      rating: 4.8,
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Camilo"
-    }
   };
 
   const listing = foundListing
@@ -39,7 +54,6 @@ export default function ListingDetailsPage() {
         images: foundListing.images?.length ? foundListing.images : [defaultListing.images[0]],
         category: foundListing.category,
         condition: foundListing.status || "Like New",
-        owner: defaultListing.owner
       }
     : defaultListing;
 
@@ -103,28 +117,32 @@ export default function ListingDetailsPage() {
             {/* Card del Vendedor */}
             <div className="bg-[#1e293b]/40 backdrop-blur-xl border border-slate-800 p-6 rounded-3xl mb-8 flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <img src={listing.owner.avatar} className="w-14 h-14 rounded-full bg-indigo-500/20 p-1" />
+                <img src={sellerDisplay.avatar} alt={sellerDisplay.name} className="w-14 h-14 rounded-full bg-indigo-500/20 p-1" />
                 <div>
-                  <h4 className="text-white font-bold">{listing.owner.name}</h4>
-                  <p className="text-slate-400 text-sm">{listing.owner.major}</p>
+                  <h4 className="text-white font-bold">{sellerDisplay.name}</h4>
+                  <p className="text-slate-400 text-sm">{sellerDisplay.campus}</p>
                 </div>
               </div>
               <div className="text-right">
-                <div className="text-yellow-500 font-bold">★ {listing.owner.rating}</div>
-                <p className="text-slate-500 text-xs uppercase tracking-tighter">Seller Rating</p>
+                <Link
+                  to={!user ? "/login" : foundListing && foundListing.ownerId === user.id ? "/chat" : `/chat/${id}-${user.id}`}
+                  className="text-indigo-400 hover:text-indigo-300 text-sm font-bold"
+                >
+                  Contact
+                </Link>
               </div>
             </div>
 
             {/* Acciones Finales */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-auto">
               <Link 
-                to={`/chat/${id}`}
+                to={!user ? "/login" : foundListing && foundListing.ownerId === user.id ? "/chat" : `/chat/${id}-${user.id}`}
                 className="flex items-center justify-center gap-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-4 rounded-2xl transition-all shadow-xl shadow-emerald-900/20 active:scale-[0.98]"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                 </svg>
-                Contact Seller
+                {foundListing && user && foundListing.ownerId === user.id ? "Ver mensajes" : "Contact Seller"}
               </Link>
               <button className="flex items-center justify-center gap-3 bg-slate-800 hover:bg-slate-700 text-white font-black py-4 rounded-2xl transition-all border border-slate-700 active:scale-[0.98]">
                 Make an Offer

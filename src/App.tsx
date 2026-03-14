@@ -6,6 +6,7 @@ import Login from "./pages/login"
 import Navbar from "./components/layout/Navbar"
 import Signup from "./pages/sign-up"
 import Chat from "./pages/chat"
+import Profile from "./pages/profile"
 import NotFound from "./pages/not-found"
 
 function App() {
@@ -20,7 +21,9 @@ function App() {
           <Route path="/create" element={<CreateListing />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/chat/:id" element={<Chat />} />
+          <Route path="/chat" element={<Chat />} />
+          <Route path="/chat/:chatId" element={<Chat />} />
+          <Route path="/profile" element={<Profile />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

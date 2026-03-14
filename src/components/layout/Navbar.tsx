@@ -1,8 +1,9 @@
 import { Link, NavLink } from "react-router-dom";
-import { useState } from "react";
+import { useStore } from "../../store/useStore";
 
 export default function Navbar() {
-  const [searchQuery, setSearchQuery] = useState("");
+  const searchQuery = useStore((state) => state.searchQuery);
+  const setSearchQuery = useStore((state) => state.setSearchQuery);
 
   const navLinkStyles = ({ isActive }: { isActive: boolean }) =>
     `text-sm font-medium transition-all duration-200 ${
@@ -13,7 +14,7 @@ export default function Navbar() {
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Buscando:", searchQuery);
+    // La búsqueda se aplica en tiempo real al filtrar en Home
   };
 
   return (
@@ -53,6 +54,9 @@ export default function Navbar() {
           <div className="hidden lg:flex space-x-6">
             <NavLink to="/listings" className={navLinkStyles}>
               Listings
+            </NavLink>
+            <NavLink to="/chat" className={navLinkStyles}>
+              Chat
             </NavLink>
             <NavLink to="/profile" className={navLinkStyles}>
               Profile

@@ -1,7 +1,9 @@
 import type { Listing } from '../../types'
 import { Link } from 'react-router-dom'
+import { useStore } from '../../store/useStore'
 
 export default function ListingCard({ listing }: { listing: Listing }) {
+  const user = useStore((state) => state.user)
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-800 bg-[#1e293b]/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-indigo-500/50 hover:shadow-[0_8px_30px_rgb(0,0,0,0.4)]">
     
@@ -40,7 +42,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 
         <div className="mt-auto flex gap-2">
           <Link 
-            to={`/chat/${listing.id}`} 
+            to={!user ? "/login" : listing.ownerId === user.id ? "/chat" : `/chat/${listing.id}-${user.id}`}
             className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-emerald-600 py-2.5 text-xs font-bold text-white transition-all hover:bg-emerald-500 active:scale-95 shadow-lg shadow-emerald-900/20"
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
