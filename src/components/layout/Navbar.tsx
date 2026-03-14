@@ -2,6 +2,8 @@ import { Link, NavLink } from "react-router-dom";
 import { useStore } from "../../store/useStore";
 
 export default function Navbar() {
+  //Destructutación de nuestro objeto useStore que es dónde tenemos el searchQuery actual y la función para actualizarlo
+  //lo que se esta haciendo es usar nuestro Store para obtener el dato de searchQuery en su estado actual y la función setSearchQuery para actualizar ese dato cada vez que el usuario escriba en el input de búsqueda
   const searchQuery = useStore((state) => state.searchQuery);
   const setSearchQuery = useStore((state) => state.setSearchQuery);
 
@@ -12,6 +14,9 @@ export default function Navbar() {
         : "text-slate-400 hover:text-white"
     }`;
 
+  //El prevent default se utiliza para evitar que el formulario se envíe de la manera tradicional,
+  //lo que recargaría la página. En su lugar, queremos manejar la búsqueda en tiempo real a medida que el usuario escribe,
+  //sin necesidad de recargar o enviar el formulario. Al prevenir el comportamiento predeterminado del formulario, podemos actualizar el estado de searchQuery y permitir que la aplicación filtre los listings en tiempo real sin interrupciones.
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     // La búsqueda se aplica en tiempo real al filtrar en Home
@@ -33,8 +38,11 @@ export default function Navbar() {
         >
           <input
             type="text"
+            //El valor es la searchQuery actual que tenemos en nuestro estado global
             value={searchQuery}
+            //Se actualiza en cada cambio
             onChange={(e) => setSearchQuery(e.target.value)}
+            //Además esta sincronizado con el home para que cuando se cambie aquí se cambie allá
             placeholder="Search for items, books, services..."
             className="w-full bg-slate-900/50 border border-slate-700 text-slate-200 text-sm rounded-2xl px-5 py-2.5 
                        focus:outline-none focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 

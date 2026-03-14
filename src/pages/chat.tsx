@@ -5,6 +5,7 @@ import { users } from "../data/users";
 import { Items } from "../data/items";
 
 export default function ChatPage() {
+  //Obtenemos el chatId de la URL, el usuario actual, los chats y las funciones necesarias del store
   const { chatId } = useParams();
   const currentUser = useStore((state) => state.user);
   const chats = useStore((state) => state.chats);
