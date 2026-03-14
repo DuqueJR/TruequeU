@@ -25,15 +25,19 @@ export default function ChatPage() {
     const listingId = chatId.slice(0, idx);
     const buyerId = chatId.slice(idx + 1);
     const listing = allListings.find((l) => l.id === listingId);
+    //Aquí se valida que el listing exista y que el usuario actual sea el comprador, para luego crear el chat si no existe
     if (listing && buyerId === currentUser.id) {
       getOrCreateChat(listing.id, listing.title, listing.ownerId, buyerId);
     }
   }, [chatId, currentUser, allListings, chats, getOrCreateChat]);
+  //Este es el arreglo de dependencias para el useEffect, se asegura de que se ejecute cada vez que cambie el chatId,
+  //el usuario actual, los listings o los chats
 
+  //Muestra los chats en que un usuario participa ya sea como vendedor o comprador
   const myChats = Object.values(chats).filter(
     (c) => c.sellerId === currentUser?.id || c.buyerId === currentUser?.id
   );
-
+  //Encuentra quien es la otra persona en el chat, para mostrar su nombre e imagen
   const getPartner = (chat: (typeof myChats)[0]) => {
     const partnerId = chat.sellerId === currentUser?.id ? chat.buyerId : chat.sellerId;
     return users.find((u) => u.id === partnerId);
@@ -42,6 +46,7 @@ export default function ChatPage() {
   const activeChat = chatId ? chats[chatId] : null;
   const partner = activeChat ? getPartner(activeChat) : null;
 
+  //Se encarga del envio del mensaje
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!newMessage.trim() || !currentUser || !chatId) return;
@@ -49,13 +54,14 @@ export default function ChatPage() {
     setNewMessage("");
   };
 
+  //Si no está logeado le decimos que se debe logear
   if (!currentUser) {
     return (
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="text-center">
-          <p className="text-slate-400 mb-4">Inicia sesión para ver tus chats.</p>
+          <p className="text-slate-400 mb-4">Log in to see your chats.</p>
           <Link to="/login" className="text-indigo-400 font-bold hover:text-indigo-300">
-            Iniciar sesión
+            Log In
           </Link>
         </div>
       </div>
@@ -67,12 +73,12 @@ export default function ChatPage() {
       {/* Sidebar: Lista de chats */}
       <aside className="w-full md:w-80 border-r border-slate-800 flex flex-col bg-slate-900/20 shrink-0">
         <div className="p-6 border-b border-slate-800">
-          <h2 className="text-xl font-black text-white tracking-tighter">Mensajes</h2>
+          <h2 className="text-xl font-black text-white tracking-tighter">Messages</h2>
         </div>
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
           {myChats.length === 0 ? (
             <p className="text-slate-500 text-sm p-4">
-              No tienes conversaciones. Contacta a un vendedor desde un listing.
+              You don't have any chats yet. Browse listings and contact sellers to start a conversation.
             </p>
           ) : (
             myChats.map((chat) => {
@@ -134,7 +140,7 @@ export default function ChatPage() {
             <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-[#0f172a]">
               {activeChat.messages.length === 0 ? (
                 <p className="text-slate-500 text-sm text-center py-8">
-                  Envía un mensaje para iniciar la conversación.
+                  Send a message to start a conversation
                 </p>
               ) : (
                 activeChat.messages.map((msg) => (
@@ -178,9 +184,9 @@ export default function ChatPage() {
         ) : (
           <div className="flex-1 flex items-center justify-center text-slate-500">
             {chatId ? (
-              <p>Chat no encontrado.</p>
+              <p>Chat not found.</p>
             ) : (
-              <p>Selecciona una conversación o contacta a un vendedor.</p>
+              <p>Select a conversation or contact a seller to start a chat.</p>
             )}
           </div>
         )}

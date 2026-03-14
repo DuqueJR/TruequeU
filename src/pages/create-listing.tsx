@@ -4,10 +4,13 @@ import { useStore } from "../store/useStore";
 import { validateListing } from "../services/listing.service";
 
 export default function CreateListingPage() {
+  //Permite redirigir a un usuario a otra página
   const navigate = useNavigate();
   const user = useStore((state) => state.user);
   const addListing = useStore((state) => state.addListing);
+  //Mensaje de error para mostrar validaciones
   const [error, setError] = useState("");
+  //Estado del formulario para controlar los inputs
   const [formData, setFormData] = useState({
     title: "",
     price: "",
@@ -63,8 +66,8 @@ export default function CreateListingPage() {
     return (
       <div className="flex-1 flex items-center justify-center px-6 py-12">
         <div className="text-center">
-          <p className="text-slate-400 mb-4">Debes iniciar sesión para crear un listing.</p>
-          <Link to="/login" className="text-indigo-400 font-bold hover:text-indigo-300">Iniciar sesión</Link>
+          <p className="text-slate-400 mb-4">You have to log in to create a listing.</p>
+          <Link to="/login" className="text-indigo-400 font-bold hover:text-indigo-300">Log In</Link>
         </div>
       </div>
     );

@@ -1,11 +1,10 @@
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useStore } from "../../store/useStore";
 
 export default function Navbar() {
-  //Destructutación de nuestro objeto useStore que es dónde tenemos el searchQuery actual y la función para actualizarlo
-  //lo que se esta haciendo es usar nuestro Store para obtener el dato de searchQuery en su estado actual y la función setSearchQuery para actualizar ese dato cada vez que el usuario escriba en el input de búsqueda
   const searchQuery = useStore((state) => state.searchQuery);
   const setSearchQuery = useStore((state) => state.setSearchQuery);
+  const navigate = useNavigate();
 
   const navLinkStyles = ({ isActive }: { isActive: boolean }) =>
     `text-sm font-medium transition-all duration-200 ${
@@ -14,12 +13,9 @@ export default function Navbar() {
         : "text-slate-400 hover:text-white"
     }`;
 
-  //El prevent default se utiliza para evitar que el formulario se envíe de la manera tradicional,
-  //lo que recargaría la página. En su lugar, queremos manejar la búsqueda en tiempo real a medida que el usuario escribe,
-  //sin necesidad de recargar o enviar el formulario. Al prevenir el comportamiento predeterminado del formulario, podemos actualizar el estado de searchQuery y permitir que la aplicación filtre los listings en tiempo real sin interrupciones.
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    // La búsqueda se aplica en tiempo real al filtrar en Home
+    navigate("/listings");
   };
 
   return (

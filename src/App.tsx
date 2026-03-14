@@ -2,6 +2,7 @@ import CreateListing from "./pages/create-listing"
 import ListingDetail from "./pages/listing-details"
 import { Routes, Route } from "react-router-dom"
 import Home from "./pages/home"
+import Listings from "./pages/listings"
 import Login from "./pages/login"
 import Navbar from "./components/layout/Navbar"
 import Signup from "./pages/sign-up"
@@ -16,7 +17,7 @@ function App() {
       <main className="flex-1">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/listings" element={<Home />} />
+          <Route path="/listings" element={<Listings />} />
           <Route path="/listing/:id" element={<ListingDetail />} />
           <Route path="/create" element={<CreateListing />} />
           <Route path="/login" element={<Login />} />
