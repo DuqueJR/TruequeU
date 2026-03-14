@@ -1,42 +1,62 @@
 import type { Listing } from '../../types'
+import { Link } from 'react-router-dom'
 
 export default function ListingCard({ listing }: { listing: Listing }) {
-    return (
-<div className="max-w-sm rounded-xl overflow-hidden shadow-lg bg-white border border-gray-200 hover:shadow-2xl transition-shadow duration-300">
-      {/* Image Container */}
-      <div className="relative h-48 w-full">
+  return (
+    <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-800 bg-[#1e293b]/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-indigo-500/50 hover:shadow-[0_8px_30px_rgb(0,0,0,0.4)]">
+    
+      <div className="aspect-square w-full overflow-hidden bg-slate-800 relative">
         <img 
-          className="w-full h-full object-cover" 
-          src={listing.images[0]} 
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110" 
+          src={listing.images[0] || 'https://via.placeholder.com/400'} 
           alt={listing.title} 
         />
-        {/* Status Badge */}
-        <span className="absolute top-2 right-2 bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full uppercase">
-          {listing.status}
-        </span>
+        
+        <div className="absolute top-3 left-3 flex flex-col gap-2">
+          <span className="rounded-full bg-indigo-600/90 backdrop-blur-md px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-lg">
+            {listing.status}
+          </span>
+        </div>
+
+        <button className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-slate-900/60 text-white backdrop-blur-md transition-all hover:bg-red-500 hover:text-white">
+          <span className="text-lg">♥</span>
+        </button>
       </div>
 
-      {/* Content */}
-      <div className="p-4">
-        <div className="flex justify-between items-start mb-2">
-          <h3 className="text-lg font-bold text-gray-800 truncate flex-1">
+      <div className="flex flex-1 flex-col p-4">
+        <div className="mb-1 flex items-start justify-between gap-2">
+          <h3 className="line-clamp-1 text-sm font-semibold text-slate-100 group-hover:text-indigo-400 transition-colors">
             {listing.title}
           </h3>
-          <p className="text-xl font-bold text-green-600 ml-2">
+          <p className="whitespace-nowrap text-lg font-black text-white">
             ${listing.price.toLocaleString()}
           </p>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex gap-2">
-          <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors">
-            View Details
-          </button>
-          <button className="p-2 border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-400 hover:text-red-500">
-            ♥
-          </button>
+        <p className="mb-4 text-[11px] text-slate-500 flex items-center">
+          <span className="w-2 h-2 bg-green-500 rounded-full mr-1.5 animate-pulse"></span>
+          Vendedor: <span className="text-slate-400 ml-1">@{listing.ownerId || 'usuario'}</span>
+        </p>
+
+        <div className="mt-auto flex gap-2">
+          <Link 
+            to={`/chat/${listing.id}`} 
+            className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-emerald-600 py-2.5 text-xs font-bold text-white transition-all hover:bg-emerald-500 active:scale-95 shadow-lg shadow-emerald-900/20"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+            </svg>
+            Chat
+          </Link>
+
+          <Link 
+            to={`/listing/${listing.id}`}
+            className="px-4 flex items-center justify-center rounded-xl bg-slate-800 text-xs font-bold text-slate-300 transition-all hover:bg-slate-700 hover:text-white border border-slate-700"
+          >
+            Details
+          </Link>
         </div>
       </div>
     </div>
-    )
+  )
 }

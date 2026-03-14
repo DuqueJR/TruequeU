@@ -1,35 +1,49 @@
 @import "tailwindcss";
 
+/* En Tailwind v4, puedes definir tus variables de marca 
+  directamente aquí para usarlas como clases (ej. text-brand-accent)
+*/
+@theme {
+  --color-brand-bg: var(--bg);
+  --color-brand-text: var(--text);
+  --color-brand-header: var(--text-h);
+  --color-brand-accent: var(--accent);
+}
+
 :root {
+  --bg: #ffffff;
   --text: #6b6375;
   --text-h: #08060d;
-  --bg: #fff;
-  --border: #e5e4e7;
   --accent: #aa3bff;
-  /* ... keep your other variables here ... */
+  --border: #e5e4e7;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
+    --bg: #0f172a; /* Azul oscuro profundo para combinar con tu Navbar */
     --text: #9ca3af;
     --text-h: #f3f4f6;
-    --bg: #16171d;
-    --border: #2e303a;
     --accent: #c084fc;
+    --border: #1e293b;
   }
 }
 
-/* Base styles to let Tailwind do its job */
-body {
-  margin: 0;
-  background-color: var(--bg);
-  color: var(--text);
-  font-family: system-ui, sans-serif;
+/* Estilos Base Limpios */
+@layer base {
+  body {
+    @apply m-0 min-h-screen antialiased;
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, sans-serif; /* Inter suele verse mejor */
+  }
+
+  #root {
+    @apply flex min-h-screen flex-col;
+  }
+  
+  /* Evita que los encabezados tengan el color gris suave por defecto */
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--text-h);
+  }
 }
 
-/* Remove the forced 'text-align: center' and fixed width from #root */
-#root {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-}
