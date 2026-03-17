@@ -3,6 +3,7 @@ import ListingDetail from "./pages/listing-details"
 import { Routes, Route } from "react-router-dom"
 import Home from "./pages/home"
 import Listings from "./pages/listings"
+import Favorites from "./pages/favorites"
 import Login from "./pages/login"
 import Navbar from "./components/layout/Navbar"
 import Signup from "./pages/sign-up"
@@ -18,6 +19,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/listings" element={<Listings />} />
+          <Route path="/favorites" element={<Favorites />} />
           <Route path="/listing/:id" element={<ListingDetail />} />
           <Route path="/create" element={<CreateListing />} />
           <Route path="/login" element={<Login />} />

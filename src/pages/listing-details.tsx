@@ -1,6 +1,6 @@
 import { useParams, Link } from "react-router-dom";
 import { useState } from "react";
-import { useStore } from "../store/useStore";
+import { useStore, EMPTY_FAVORITES } from "../store/useStore";
 import { Items } from "../data/items";
 import { users } from "../data/users";
 
@@ -8,6 +8,13 @@ export default function ListingDetailsPage() {
   const { id } = useParams();
   const user = useStore((state) => state.user);
   const storeListings = useStore((state) => state.listings);
+  const favoriteIds = useStore((state) => {
+    const userId = state.user?.id;
+    if (!userId) return EMPTY_FAVORITES;
+    const ids = (state.favoritesByUser ?? {})[userId];
+    return ids?.length ? ids : EMPTY_FAVORITES;
+  });
+  const toggleFavorite = useStore((state) => state.toggleFavorite);
   const allListings = [...Items, ...storeListings];
   const foundListing = allListings.find((l) => l.id === id);
 
@@ -98,10 +105,34 @@ export default function ListingDetailsPage() {
           {/* COLUMNA DERECHA: Info */}
           <div className="flex flex-col">
             <div className="mb-6">
-              <span className="text-indigo-400 text-sm font-bold uppercase tracking-widest">{listing.category}</span>
-              <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter mt-2 mb-4">
-                {listing.title}
-              </h1>
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <span className="text-indigo-400 text-sm font-bold uppercase tracking-widest">{listing.category}</span>
+                  <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter mt-2 mb-4">
+                    {listing.title}
+                  </h1>
+                </div>
+                {id && user && (
+                  <button
+                    type="button"
+                    onClick={() => toggleFavorite(id)}
+                    aria-label={favoriteIds.includes(id) ? "Quitar de favoritos" : "Añadir a favoritos"}
+                    className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-all hover:scale-110 ${
+                      favoriteIds.includes(id) ? "bg-red-500 text-white" : "bg-slate-800 text-slate-400 hover:bg-red-500/20 hover:text-red-400"
+                    }`}
+                  >
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className={`h-6 w-6 ${favoriteIds.includes(id) ? "fill-current" : ""}`}
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      strokeWidth={2}
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                    </svg>
+                  </button>
+                )}
+              </div>
               <div className="flex items-center gap-4">
                 <span className="text-3xl font-black text-white">${listing.price}</span>
                 <span className="px-3 py-1 rounded-full bg-slate-800 text-slate-300 text-xs font-bold uppercase">

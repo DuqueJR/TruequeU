@@ -1,11 +1,29 @@
 import type { Listing } from '../../types'
-import { Link } from 'react-router-dom'
-import { useStore } from '../../store/useStore'
+import { Link, useNavigate } from 'react-router-dom'
+import { useStore, EMPTY_FAVORITES } from '../../store/useStore'
 
-//Recibimos nuestro arreglo de listings
 export default function ListingCard({ listing }: { listing: Listing }) {
-  // Obtener el usuario actual para el chat
+  const navigate = useNavigate()
   const user = useStore((state) => state.user)
+  const favoriteIds = useStore((state) => {
+    const userId = state.user?.id
+    if (!userId) return EMPTY_FAVORITES
+    const ids = (state.favoritesByUser ?? {})[userId]
+    return ids?.length ? ids : EMPTY_FAVORITES
+  })
+  const toggleFavorite = useStore((state) => state.toggleFavorite)
+  const isFavorite = favoriteIds.includes(listing.id)
+
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    if (!user) {
+      navigate("/login")
+      return
+    }
+    toggleFavorite(listing.id)
+  }
+
   return (
     <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-800 bg-[#1e293b]/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-indigo-500/50 hover:shadow-[0_8px_30px_rgb(0,0,0,0.4)]">
     
@@ -23,9 +41,23 @@ export default function ListingCard({ listing }: { listing: Listing }) {
             {listing.status}
           </span>
         </div>
-        {/* Botón de favorito que aún no hace nada*/}
-        <button className="absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full bg-slate-900/60 text-white backdrop-blur-md transition-all hover:bg-red-500 hover:text-white">
-          <span className="text-lg">♥</span>
+        <button
+          type="button"
+          onClick={handleFavoriteClick}
+          aria-label={!user ? "Inicia sesión para guardar favoritos" : isFavorite ? "Quitar de favoritos" : "Añadir a favoritos"}
+          className={`absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-md transition-all hover:scale-110 ${
+            isFavorite ? "bg-red-500 text-white" : "bg-slate-900/60 text-white hover:bg-red-500"
+          }`}
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            className={`h-5 w-5 ${isFavorite ? "fill-current" : ""}`}
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+            strokeWidth={2}
+          >
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+          </svg>
         </button>
       </div>
 

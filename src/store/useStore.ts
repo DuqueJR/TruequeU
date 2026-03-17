@@ -2,6 +2,9 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Listing, User } from '../types.ts';
 
+/** Referencia estable para cuando no hay favoritos (evita bucle infinito en useSyncExternalStore) */
+export const EMPTY_FAVORITES: readonly string[] = [];
+
 export interface RegisteredUser extends User {
   password: string;
 }
@@ -26,6 +29,7 @@ interface StoreState {
   listings: Listing[];
   user: User | null;
   registeredUsers: RegisteredUser[];
+  favoritesByUser: Record<string, string[]>;
   searchQuery: string;
   chats: Record<string, Chat>;
   addListing: (item: Listing) => void;
@@ -45,6 +49,7 @@ export const useStore = create<StoreState>()(
     listings: [],
     user: null,
     registeredUsers: [],
+    favoritesByUser: {},
     searchQuery: "",
     chats: {},
 
@@ -61,11 +66,21 @@ export const useStore = create<StoreState>()(
         })),
 
       toggleFavorite: (id) =>
-        set((state) => ({
-          listings: state.listings.map((l) =>
-            l.id === id ? { ...l, isFavorite: !l.isFavorite } : l
-          ),
-        })),
+        set((state) => {
+          const userId = state.user?.id;
+          if (!userId) return state;
+          const userFavs = (state.favoritesByUser ?? {})[userId] ?? [];
+          const isFav = userFavs.includes(id);
+          return {
+            favoritesByUser: {
+              ...(state.favoritesByUser ?? {}),
+              [userId]: isFav ? userFavs.filter((f) => f !== id) : [...userFavs, id],
+            },
+            listings: state.listings.map((l) =>
+              l.id === id ? { ...l, isFavorite: !l.isFavorite } : l
+            ),
+          };
+        }),
 
     addRegisteredUser: (user) =>
       set((s) => ({
@@ -114,6 +129,7 @@ export const useStore = create<StoreState>()(
         listings: state.listings,
         user: state.user,
         registeredUsers: state.registeredUsers,
+        favoritesByUser: state.favoritesByUser,
         chats: state.chats,
       }),
     }

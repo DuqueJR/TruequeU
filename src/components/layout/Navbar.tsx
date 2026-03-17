@@ -59,6 +59,9 @@ export default function Navbar() {
             <NavLink to="/listings" className={navLinkStyles}>
               Listings
             </NavLink>
+            <NavLink to="/favorites" className={navLinkStyles}>
+              Favorites
+            </NavLink>
             <NavLink to="/chat" className={navLinkStyles}>
               Chat
             </NavLink>
