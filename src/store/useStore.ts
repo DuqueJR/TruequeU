@@ -2,6 +2,10 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Listing, User } from '../types.ts';
 
+export interface RegisteredUser extends User {
+  password: string;
+}
+
 export interface ChatMessage {
   id: string;
   senderId: string;
@@ -21,11 +25,13 @@ export interface Chat {
 interface StoreState {
   listings: Listing[];
   user: User | null;
+  registeredUsers: RegisteredUser[];
   searchQuery: string;
   chats: Record<string, Chat>;
   addListing: (item: Listing) => void;
   updateStatus: (id: string, status: Listing['status']) => void;
   toggleFavorite: (id: string) => void;
+  addRegisteredUser: (user: RegisteredUser) => void;
   login: (userData: User) => void;
   logout: () => void;
   setSearchQuery: (query: string) => void;
@@ -36,12 +42,13 @@ interface StoreState {
 export const useStore = create<StoreState>()(
   persist(
     (set, get) => ({
-      listings: [],
-      user: null,
-      searchQuery: "",
-      chats: {},
+    listings: [],
+    user: null,
+    registeredUsers: [],
+    searchQuery: "",
+    chats: {},
 
-      addListing: (item) =>
+    addListing: (item) =>
         set((state) => ({
           listings: [item, ...state.listings],
         })),
@@ -60,8 +67,12 @@ export const useStore = create<StoreState>()(
           ),
         })),
 
-      login: (userData) => set({ user: userData }),
-      logout: () => set({ user: null }),
+    addRegisteredUser: (user) =>
+      set((s) => ({
+        registeredUsers: [...s.registeredUsers, user],
+      })),
+    login: (userData) => set({ user: userData }),
+    logout: () => set({ user: null }),
       setSearchQuery: (query) => set({ searchQuery: query }),
 
       getOrCreateChat: (listingId, listingTitle, sellerId, buyerId) => {
@@ -99,7 +110,12 @@ export const useStore = create<StoreState>()(
     }),
     {
       name: 'marketplace-storage',
-      partialize: (state) => ({ listings: state.listings, user: state.user, chats: state.chats }),
+      partialize: (state) => ({
+        listings: state.listings,
+        user: state.user,
+        registeredUsers: state.registeredUsers,
+        chats: state.chats,
+      }),
     }
   )
 );

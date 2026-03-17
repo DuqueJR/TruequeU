@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useStore } from "../store/useStore";
-import { registerUser, validatePassword, isEmailTaken } from "../services/auth.service";
+import { validatePassword } from "../services/auth.service";
+import { apiRegister } from "../api/client";
 
 export default function SignupPage() {
   const [formData, setFormData] = useState({
@@ -12,15 +13,18 @@ export default function SignupPage() {
     confirmPassword: "",
   });
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const login = useStore((state) => state.login);
+  const addRegisteredUser = useStore((state) => state.addRegisteredUser);
+  const registeredUsers = useStore((state) => state.registeredUsers);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
     setError("");
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
@@ -35,21 +39,34 @@ export default function SignupPage() {
       return;
     }
 
-    if (isEmailTaken(formData.email)) {
+    const emailTaken =
+      registeredUsers.some((u) => u.email.toLowerCase() === formData.email.toLowerCase().trim());
+    if (emailTaken) {
       setError("Este correo ya está registrado");
       return;
     }
 
+    setLoading(true);
     try {
-      const user = registerUser({
+      const result = await apiRegister({
         email: formData.email,
         name: formData.fullName,
         password: formData.password,
       });
-      login(user);
-      navigate("/");
+      if (result.data) {
+        addRegisteredUser({
+          ...result.data,
+          password: formData.password,
+        });
+        login(result.data);
+        navigate("/");
+      } else {
+        setError(result.error ?? "Error al crear la cuenta");
+      }
     } catch {
-      setError("Error al crear la cuenta. Intenta de nuevo.");
+      setError("Error de conexión. Intenta de nuevo.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -165,9 +182,10 @@ export default function SignupPage() {
             <div className="md:col-span-2 mt-4">
               <button
                 type="submit"
-                className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 rounded-2xl transition-all shadow-xl shadow-indigo-500/20 active:scale-[0.99]"
+                disabled={loading}
+                className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-black py-4 rounded-2xl transition-all shadow-xl shadow-indigo-500/20 active:scale-[0.99]"
               >
-                Create Account
+                {loading ? "Creando cuenta..." : "Create Account"}
               </button>
             </div>
           </form>

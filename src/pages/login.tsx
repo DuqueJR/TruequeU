@@ -1,24 +1,41 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useStore } from "../store/useStore";
-import { validateLogin } from "../services/auth.service";
+import { apiLogin } from "../api/client";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
   const login = useStore((state) => state.login);
+  const registeredUsers = useStore((state) => state.registeredUsers);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    const user = validateLogin(email, password);
-    if (user) {
-      login(user);
-      navigate("/");
-    } else {
-      setError("Email o contraseña incorrectos. Regístrate si no tienes cuenta.");
+    setLoading(true);
+    try {
+      const result = await apiLogin(email, password);
+      if (result.data) {
+        login(result.data);
+        navigate("/");
+        return;
+      }
+      const fromStore = registeredUsers.find(
+        (u) => u.email.toLowerCase() === email.toLowerCase().trim()
+      );
+      if (fromStore && fromStore.password === password) {
+        login({ id: fromStore.id, email: fromStore.email, name: fromStore.name });
+        navigate("/");
+      } else {
+        setError(result.error ?? "Email o contraseña incorrectos. Regístrate si no tienes cuenta.");
+      }
+    } catch {
+      setError("Error de conexión. Intenta de nuevo.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -80,9 +97,10 @@ export default function LoginPage() {
             {/* Botón Submit */}
             <button
               type="submit"
-              className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 rounded-2xl transition-all shadow-lg shadow-indigo-500/20 active:scale-[0.98]"
+              disabled={loading}
+              className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-bold py-3.5 rounded-2xl transition-all shadow-lg shadow-indigo-500/20 active:scale-[0.98]"
             >
-              Sign In
+              {loading ? "Cargando..." : "Sign In"}
             </button>
           </form>
 

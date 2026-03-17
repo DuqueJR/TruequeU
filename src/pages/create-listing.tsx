@@ -2,14 +2,14 @@ import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useStore } from "../store/useStore";
 import { validateListing } from "../services/listing.service";
+import { apiCreateListing } from "../api/client";
 
 export default function CreateListingPage() {
-  //Permite redirigir a un usuario a otra página
   const navigate = useNavigate();
   const user = useStore((state) => state.user);
   const addListing = useStore((state) => state.addListing);
-  //Mensaje de error para mostrar validaciones
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   //Estado del formulario para controlar los inputs
   const [formData, setFormData] = useState({
     title: "",
@@ -34,7 +34,7 @@ export default function CreateListingPage() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
     setError("");
@@ -47,19 +47,28 @@ export default function CreateListingPage() {
       setError(validation.message);
       return;
     }
-    const listing = {
-      id: `listing-${Date.now()}`,
-      title: formData.title,
-      description: formData.description,
-      price: Number(formData.price),
-      category: formData.category,
-      status: "available" as const,
-      images: formData.image ? [formData.image] : ["https://via.placeholder.com/400"],
-      ownerId: user.id,
-      isFavorite: false,
-    };
-    addListing(listing);
-    navigate("/");
+    setLoading(true);
+    try {
+      const result = await apiCreateListing({
+        title: formData.title,
+        description: formData.description,
+        price: Number(formData.price),
+        category: formData.category,
+        status: "available",
+        images: formData.image ? [formData.image] : ["https://via.placeholder.com/400"],
+        ownerId: user.id,
+      });
+      if (result.data) {
+        addListing(result.data);
+        navigate("/");
+      } else {
+        setError(result.error ?? "Error al publicar");
+      }
+    } catch {
+      setError("Error de conexión. Intenta de nuevo.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!user) {
@@ -197,9 +206,10 @@ export default function CreateListingPage() {
 
               <button
                 type="submit"
-                className="w-full mt-8 bg-indigo-600 hover:bg-indigo-500 text-white font-black py-4 rounded-2xl transition-all shadow-xl shadow-indigo-500/20 active:scale-95"
+                disabled={loading}
+                className="w-full mt-8 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-black py-4 rounded-2xl transition-all shadow-xl shadow-indigo-500/20 active:scale-95"
               >
-                Publish Listing
+                {loading ? "Publicando..." : "Publish Listing"}
               </button>
               
               <p className="text-[10px] text-slate-500 text-center mt-4 leading-tight">
