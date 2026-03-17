@@ -11,6 +11,12 @@ export default function ListingsPage() {
   const [listings, setListings] = useState<Listing[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [category, setCategory] = useState("all")
+  const [condition, setCondition] = useState("all")
+  const [status, setStatus] = useState("all")
+  const [postedDate, setPostedDate] = useState("all")
+  const [minPrice, setMinPrice] = useState("")
+  const [maxPrice, setMaxPrice] = useState("")
 
   useEffect(() => {
     let cancelled = false
@@ -37,8 +43,33 @@ export default function ListingsPage() {
   }, [storeListings])
 
   const filteredListings = listings.filter((item) =>
-    item.title.toLowerCase().includes(searchQuery.toLowerCase())
+    item.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
+    (category === "all" || item.category.toLowerCase() === category) &&
+    (condition === "all" || (item.condition ?? "").toLowerCase() === condition) &&
+    (status === "all" || item.status === status) &&
+    (minPrice === "" || item.price >= Number(minPrice)) &&
+    (maxPrice === "" || item.price <= Number(maxPrice)) &&
+    (() => {
+      if (postedDate === "all") return true
+      if (!item.postedAt) return false
+      const itemDate = new Date(item.postedAt)
+      const today = new Date()
+      const diffDays = Math.floor((today.getTime() - itemDate.getTime()) / (1000 * 60 * 60 * 24))
+      if (postedDate === "today") return diffDays === 0
+      if (postedDate === "week") return diffDays <= 7
+      if (postedDate === "month") return diffDays <= 30
+      return true
+    })()
   )
+
+  const clearFilters = () => {
+    setCategory("all")
+    setCondition("all")
+    setStatus("all")
+    setPostedDate("all")
+    setMinPrice("")
+    setMaxPrice("")
+  }
 
   if (loading) {
     return (
@@ -77,6 +108,67 @@ export default function ListingsPage() {
           <p className="text-slate-400 text-sm">
             Explore all that the community has to offer.
           </p>
+        </div>
+        <div className="mx-auto max-w-7xl px-6 pb-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 rounded-2xl border border-slate-800 bg-[#1e293b]/30 p-4">
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => useStore.getState().setSearchQuery(e.target.value)}
+              placeholder="Search..."
+              className="rounded-xl bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+            />
+            <select value={category} onChange={(e) => setCategory(e.target.value)} className="rounded-xl bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
+              <option value="all">All categories</option>
+              <option value="books">Books</option>
+              <option value="electronics">Electronics</option>
+              <option value="furniture">Furniture</option>
+              <option value="accessories">Accessories</option>
+              <option value="study">Study</option>
+              <option value="appliances">Appliances</option>
+            </select>
+            <select value={condition} onChange={(e) => setCondition(e.target.value)} className="rounded-xl bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
+              <option value="all">All conditions</option>
+              <option value="new">New</option>
+              <option value="good">Good</option>
+              <option value="fair">Fair</option>
+            </select>
+            <select value={status} onChange={(e) => setStatus(e.target.value)} className="rounded-xl bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
+              <option value="all">All states</option>
+              <option value="available">Available</option>
+              <option value="reserved">Reserved</option>
+              <option value="sold">Sold</option>
+            </select>
+            <input
+              type="number"
+              min="0"
+              value={minPrice}
+              onChange={(e) => setMinPrice(e.target.value)}
+              placeholder="Min price"
+              className="rounded-xl bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+            />
+            <input
+              type="number"
+              min="0"
+              value={maxPrice}
+              onChange={(e) => setMaxPrice(e.target.value)}
+              placeholder="Max price"
+              className="rounded-xl bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+            />
+            <select value={postedDate} onChange={(e) => setPostedDate(e.target.value)} className="rounded-xl bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50">
+              <option value="all">Any date</option>
+              <option value="today">Today</option>
+              <option value="week">Last 7 days</option>
+              <option value="month">Last 30 days</option>
+            </select>
+            <button
+              type="button"
+              onClick={clearFilters}
+              className="rounded-xl bg-slate-800 border border-slate-700 px-3 py-2 text-sm font-medium text-slate-200 hover:bg-slate-700"
+            >
+              Clear filters
+            </button>
+          </div>
         </div>
         <ListingList
           listings={filteredListings}

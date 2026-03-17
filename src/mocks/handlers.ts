@@ -135,10 +135,12 @@ export const listingHandlers = [
       description: body.description ?? "",
       price: body.price ?? 0,
       category: body.category ?? "Other",
+      condition: body.condition ?? "good",
       status: "available",
       images: body.images?.length ? body.images : ["https://via.placeholder.com/400"],
       ownerId: body.ownerId ?? "",
       isFavorite: false,
+      postedAt: new Date().toISOString().slice(0, 10),
     };
     createdListings.push(listing);
 

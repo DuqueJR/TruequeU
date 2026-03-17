@@ -54,6 +54,7 @@ export default function CreateListingPage() {
         description: formData.description,
         price: Number(formData.price),
         category: formData.category,
+        condition: formData.condition,
         status: "available",
         images: formData.image ? [formData.image] : ["https://via.placeholder.com/400"],
         ownerId: user.id,

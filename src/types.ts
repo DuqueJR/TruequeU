@@ -9,10 +9,12 @@ export interface Listing  {
     "description": string,
     "price": number,
     "category": string,
+    "condition"?: string,
     "status": ListingStatus,
     "images": string[],
     "ownerId": string,
-    "isFavorite": boolean 
+    "isFavorite": boolean,
+    "postedAt"?: string
 }
 
 export interface User {

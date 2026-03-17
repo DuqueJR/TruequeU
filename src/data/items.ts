@@ -7,10 +7,12 @@ export const Items: Listing[] = [
     description: "Calculus book in good condition. Perfect for engineering students.",
     price: 25,
     category: "books",
+    condition: "good",
     status: "available",
     images: ["https://picsum.photos/seed/book1/400/300"],
     ownerId: "u1",
-    isFavorite: false
+    isFavorite: false,
+    postedAt: "2026-03-10"
   },
   {
     id: "2",
@@ -18,10 +20,12 @@ export const Items: Listing[] = [
     description: "Fully functional TI-84 calculator. Ideal for math and engineering courses.",
     price: 60,
     category: "electronics",
+    condition: "good",
     status: "available",
     images: ["https://picsum.photos/seed/calc1/400/300"],
     ownerId: "u2",
-    isFavorite: false
+    isFavorite: false,
+    postedAt: "2026-03-08"
   },
   {
     id: "3",
@@ -29,10 +33,12 @@ export const Items: Listing[] = [
     description: "LED desk lamp with adjustable brightness.",
     price: 15,
     category: "furniture",
+    condition: "fair",
     status: "available",
     images: ["https://picsum.photos/seed/lamp1/400/300"],
     ownerId: "u1",
-    isFavorite: false
+    isFavorite: false,
+    postedAt: "2026-03-12"
   },
   {
     id: "4",
@@ -40,10 +46,12 @@ export const Items: Listing[] = [
     description: "Aluminum laptop stand for better posture while studying.",
     price: 20,
     category: "accessories",
+    condition: "good",
     status: "available",
     images: ["https://picsum.photos/seed/stand1/400/300"],
     ownerId: "u3",
-    isFavorite: false
+    isFavorite: false,
+    postedAt: "2026-03-09"
   },
   {
     id: "5",
@@ -51,10 +59,12 @@ export const Items: Listing[] = [
     description: "Compact wireless mouse with USB receiver.",
     price: 10,
     category: "electronics",
+    condition: "new",
     status: "available",
     images: ["https://picsum.photos/seed/mouse1/400/300"],
     ownerId: "u4",
-    isFavorite: false
+    isFavorite: false,
+    postedAt: "2026-03-11"
   },
   {
     id: "6",
@@ -62,10 +72,12 @@ export const Items: Listing[] = [
     description: "Comfortable office chair for long study sessions.",
     price: 45,
     category: "furniture",
+    condition: "good",
     status: "available",
     images: ["https://picsum.photos/seed/chair1/400/300"],
     ownerId: "u2",
-    isFavorite: false
+    isFavorite: false,
+    postedAt: "2026-03-07"
   },
   {
     id: "7",
@@ -73,10 +85,12 @@ export const Items: Listing[] = [
     description: "Introductory Python programming book for beginners.",
     price: 18,
     category: "books",
+    condition: "fair",
     status: "available",
     images: ["https://picsum.photos/seed/book2/400/300"],
     ownerId: "u5",
-    isFavorite: false
+    isFavorite: false,
+    postedAt: "2026-03-13"
   },
   {
     id: "8",
@@ -84,10 +98,12 @@ export const Items: Listing[] = [
     description: "RGB mechanical keyboard with blue switches.",
     price: 70,
     category: "electronics",
+    condition: "good",
     status: "available",
     images: ["https://picsum.photos/seed/keyboard1/400/300"],
     ownerId: "u3",
-    isFavorite: false
+    isFavorite: false,
+    postedAt: "2026-03-14"
   },
   {
     id: "9",
@@ -95,10 +111,12 @@ export const Items: Listing[] = [
     description: "Full HD 24-inch monitor, great for coding and studying.",
     price: 120,
     category: "electronics",
+    condition: "good",
     status: "available",
     images: ["https://picsum.photos/seed/monitor1/400/300"],
     ownerId: "u6",
-    isFavorite: false
+    isFavorite: false,
+    postedAt: "2026-03-05"
   },
   {
     id: "10",
@@ -106,10 +124,12 @@ export const Items: Listing[] = [
     description: "Durable backpack with padded laptop compartment.",
     price: 30,
     category: "accessories",
+    condition: "new",
     status: "available",
     images: ["https://picsum.photos/seed/backpack1/400/300"],
     ownerId: "u1",
-    isFavorite: false
+    isFavorite: false,
+    postedAt: "2026-03-15"
   },
   {
     id: "11",
@@ -117,10 +137,12 @@ export const Items: Listing[] = [
     description: "Medium-sized whiteboard ideal for solving problems.",
     price: 22,
     category: "study",
+    condition: "good",
     status: "available",
     images: ["https://picsum.photos/seed/whiteboard1/400/300"],
     ownerId: "u4",
-    isFavorite: false
+    isFavorite: false,
+    postedAt: "2026-03-06"
   },
   {
     id: "12",
@@ -128,10 +150,12 @@ export const Items: Listing[] = [
     description: "Noise-isolating headphones for studying in noisy environments.",
     price: 35,
     category: "electronics",
+    condition: "fair",
     status: "available",
     images: ["https://picsum.photos/seed/headphones1/400/300"],
     ownerId: "u7",
-    isFavorite: false
+    isFavorite: false,
+    postedAt: "2026-03-04"
   },
   {
     id: "13",
@@ -139,10 +163,12 @@ export const Items: Listing[] = [
     description: "Compact mini fridge perfect for dorm rooms.",
     price: 90,
     category: "appliances",
+    condition: "good",
     status: "available",
     images: ["https://picsum.photos/seed/fridge1/400/300"],
     ownerId: "u5",
-    isFavorite: false
+    isFavorite: false,
+    postedAt: "2026-03-02"
   },
   {
     id: "14",
@@ -150,10 +176,12 @@ export const Items: Listing[] = [
     description: "Set of 5 notebooks for classes and notes.",
     price: 12,
     category: "study",
+    condition: "new",
     status: "available",
     images: ["https://picsum.photos/seed/notebooks1/400/300"],
     ownerId: "u2",
-    isFavorite: false
+    isFavorite: false,
+    postedAt: "2026-03-01"
   },
   {
     id: "15",
@@ -161,9 +189,11 @@ export const Items: Listing[] = [
     description: "Multiport USB-C hub with HDMI and USB ports.",
     price: 28,
     category: "electronics",
+    condition: "good",
     status: "available",
     images: ["https://picsum.photos/seed/hub1/400/300"],
     ownerId: "u8",
-    isFavorite: false
+    isFavorite: false,
+    postedAt: "2026-03-16"
   }
 ];

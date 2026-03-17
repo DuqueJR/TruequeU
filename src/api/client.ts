@@ -68,7 +68,7 @@ export async function apiGetListing(
 }
 
 export async function apiCreateListing(
-  listing: Omit<Listing, "id" | "isFavorite">
+  listing: Omit<Listing, "id" | "isFavorite" | "postedAt">
 ): Promise<{ data?: Listing; error?: string }> {
   const res = await fetch(`${API_BASE}/api/listings`, {
     method: "POST",
