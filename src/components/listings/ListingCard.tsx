@@ -5,6 +5,7 @@ import { useStore, EMPTY_FAVORITES } from '../../store/useStore'
 export default function ListingCard({ listing }: { listing: Listing }) {
   const navigate = useNavigate()
   const user = useStore((state) => state.user)
+  const listingStatusOverrides = useStore((state) => state.listingStatusOverrides)
   const favoriteIds = useStore((state) => {
     const userId = state.user?.id
     if (!userId) return EMPTY_FAVORITES
@@ -13,6 +14,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
   })
   const toggleFavorite = useStore((state) => state.toggleFavorite)
   const isFavorite = favoriteIds.includes(listing.id)
+  const effectiveStatus = listingStatusOverrides[listing.id] ?? listing.status
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
     e.preventDefault()
@@ -38,7 +40,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
         {/* Se muestra si esta disponible*/}
         <div className="absolute top-3 left-3 flex flex-col gap-2">
           <span className="rounded-full bg-indigo-600/90 backdrop-blur-md px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-lg">
-            {listing.status}
+            {effectiveStatus}
           </span>
         </div>
         <button
@@ -79,13 +81,30 @@ export default function ListingCard({ listing }: { listing: Listing }) {
         {/* Aqui si quiero chatear con mi propia publicación simplemente me lleva a mi página principal de chat, sino abre el chat con el usuario que tiene el id de quien hizo la publicación */}
         <div className="mt-auto flex gap-2">
           <Link 
-            to={!user ? "/login" : listing.ownerId === user.id ? "/chat" : `/chat/${listing.id}-${user.id}`}
-            className="flex-1 flex items-center justify-center gap-2 rounded-xl bg-emerald-600 py-2.5 text-xs font-bold text-white transition-all hover:bg-emerald-500 active:scale-95 shadow-lg shadow-emerald-900/20"
+            to={
+              !user
+                ? "/login"
+                : effectiveStatus === "sold"
+                  ? `/listing/${listing.id}`
+                  : listing.ownerId === user.id
+                    ? "/chat"
+                    : `/chat/${listing.id}-${user.id}`
+            }
+            onClick={(e) => {
+              if (effectiveStatus === "sold") {
+                e.preventDefault()
+              }
+            }}
+            className={`flex-1 flex items-center justify-center gap-2 rounded-xl py-2.5 text-xs font-bold text-white transition-all active:scale-95 shadow-lg shadow-emerald-900/20 ${
+              effectiveStatus === "sold"
+                ? "bg-slate-700 hover:bg-slate-700"
+                : "bg-emerald-600 hover:bg-emerald-500"
+            }`}
           >
             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
             </svg>
-            Chat
+            {effectiveStatus === "sold" ? "Sold" : "Chat"}
           </Link>
           {/* Link a la página de detalle del propio listing*/}
           <Link 

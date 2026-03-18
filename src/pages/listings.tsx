@@ -7,6 +7,7 @@ import type { Listing } from "../types"
 
 export default function ListingsPage() {
   const storeListings = useStore((state) => state.listings)
+  const listingStatusOverrides = useStore((state) => state.listingStatusOverrides)
   const searchQuery = useStore((state) => state.searchQuery)
   const [listings, setListings] = useState<Listing[]>([])
   const [loading, setLoading] = useState(true)
@@ -26,9 +27,11 @@ export default function ListingsPage() {
       .then((res) => {
         if (!cancelled) {
           const fromApi = res.data ?? []
-          const merged = [...fromApi]
-          for (const s of storeListings) {
-            if (!merged.some((a) => a.id === s.id)) merged.push(s)
+          const merged: Listing[] = [...storeListings]
+          for (const item of fromApi) {
+            if (!merged.some((a) => a.id === item.id)) {
+              merged.push(item)
+            }
           }
           setListings(merged)
         }
@@ -42,11 +45,13 @@ export default function ListingsPage() {
     return () => { cancelled = true }
   }, [storeListings])
 
-  const filteredListings = listings.filter((item) =>
+  const filteredListings = listings.filter((item) => {
+    const effectiveStatus = listingStatusOverrides[item.id] ?? item.status
+    return (
     item.title.toLowerCase().includes(searchQuery.toLowerCase()) &&
     (category === "all" || item.category.toLowerCase() === category) &&
     (condition === "all" || (item.condition ?? "").toLowerCase() === condition) &&
-    (status === "all" || item.status === status) &&
+    (status === "all" || effectiveStatus === status) &&
     (minPrice === "" || item.price >= Number(minPrice)) &&
     (maxPrice === "" || item.price <= Number(maxPrice)) &&
     (() => {
@@ -60,7 +65,8 @@ export default function ListingsPage() {
       if (postedDate === "month") return diffDays <= 30
       return true
     })()
-  )
+    )
+  })
 
   const clearFilters = () => {
     setCategory("all")

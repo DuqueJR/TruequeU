@@ -27,9 +27,9 @@ export default function FavoritesPage() {
       .then((res) => {
         if (!cancelled) {
           const fromApi = res.data ?? []
-          const merged: Listing[] = [...fromApi]
-          for (const s of storeListings) {
-            if (!merged.some((a) => a.id === s.id)) merged.push(s)
+          const merged: Listing[] = [...storeListings]
+          for (const item of fromApi) {
+            if (!merged.some((a) => a.id === item.id)) merged.push(item)
           }
           setListings(merged)
         }

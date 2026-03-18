@@ -8,6 +8,7 @@ export default function ListingDetailsPage() {
   const { id } = useParams();
   const user = useStore((state) => state.user);
   const storeListings = useStore((state) => state.listings);
+  const listingStatusOverrides = useStore((state) => state.listingStatusOverrides);
   const favoriteIds = useStore((state) => {
     const userId = state.user?.id;
     if (!userId) return EMPTY_FAVORITES;
@@ -15,10 +16,16 @@ export default function ListingDetailsPage() {
     return ids?.length ? ids : EMPTY_FAVORITES;
   });
   const toggleFavorite = useStore((state) => state.toggleFavorite);
-  const allListings = [...Items, ...storeListings];
+  const updateStatus = useStore((state) => state.updateStatus);
+  const canTransitionStatus = useStore((state) => state.canTransitionStatus);
+  const allListings = [...storeListings, ...Items];
   const foundListing = allListings.find((l) => l.id === id);
+  const effectiveStatus = foundListing
+    ? listingStatusOverrides[foundListing.id] ?? foundListing.status
+    : "available";
 
   const [activeImage, setActiveImage] = useState(0);
+  const [actionMessage, setActionMessage] = useState("");
 
   // Obtener el vendedor desde users por ownerId
   const seller = foundListing
@@ -60,9 +67,28 @@ export default function ListingDetailsPage() {
         description: foundListing.description,
         images: foundListing.images?.length ? foundListing.images : [defaultListing.images[0]],
         category: foundListing.category,
-        condition: foundListing.status || "Like New",
+        condition: foundListing.condition || "Like New",
       }
     : defaultListing;
+
+  const isOwner = Boolean(user && foundListing && foundListing.ownerId === user.id);
+
+  const handleStatusChange = (nextStatus: "available" | "reserved" | "sold") => {
+    if (!foundListing || !isOwner) {
+      setActionMessage("Solo el dueño puede cambiar el estado del listing.");
+      return;
+    }
+    if (!canTransitionStatus(effectiveStatus as "available" | "reserved" | "sold", nextStatus)) {
+      setActionMessage(
+        effectiveStatus === "sold"
+          ? "Un listing vendido no puede volver a un estado anterior."
+          : "Esa transición de estado no está permitida."
+      );
+      return;
+    }
+    updateStatus(foundListing.id, nextStatus);
+    setActionMessage(`Estado actualizado a ${nextStatus}.`);
+  };
 
   return (
     <div className="flex-1 px-6 py-8 md:py-12">
@@ -138,8 +164,17 @@ export default function ListingDetailsPage() {
                 <span className="px-3 py-1 rounded-full bg-slate-800 text-slate-300 text-xs font-bold uppercase">
                   {listing.condition}
                 </span>
+                <span className="px-3 py-1 rounded-full bg-indigo-500/15 text-indigo-300 text-xs font-bold uppercase">
+                  {effectiveStatus}
+                </span>
               </div>
             </div>
+
+            {actionMessage && (
+              <p className="mb-4 rounded-2xl border border-slate-800 bg-slate-900/50 px-4 py-3 text-sm text-slate-300">
+                {actionMessage}
+              </p>
+            )}
 
             <p className="text-slate-400 leading-relaxed mb-8 text-lg">
               {listing.description}
@@ -167,7 +202,21 @@ export default function ListingDetailsPage() {
             {/* Acciones Finales */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-auto">
               <Link 
-                to={!user ? "/login" : foundListing && foundListing.ownerId === user.id ? "/chat" : `/chat/${id}-${user.id}`}
+                to={
+                  !user
+                    ? "/login"
+                    : effectiveStatus === "sold"
+                      ? "/listing/" + id
+                      : foundListing && foundListing.ownerId === user.id
+                        ? "/chat"
+                        : `/chat/${id}-${user.id}`
+                }
+                onClick={(e) => {
+                  if (effectiveStatus === "sold") {
+                    e.preventDefault();
+                    setActionMessage("Este listing ya fue vendido y no admite nuevos chats.");
+                  }
+                }}
                 className="flex items-center justify-center gap-3 bg-emerald-600 hover:bg-emerald-500 text-white font-black py-4 rounded-2xl transition-all shadow-xl shadow-emerald-900/20 active:scale-[0.98]"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -175,10 +224,58 @@ export default function ListingDetailsPage() {
                 </svg>
                 {foundListing && user && foundListing.ownerId === user.id ? "Ver mensajes" : "Contact Seller"}
               </Link>
-              <button className="flex items-center justify-center gap-3 bg-slate-800 hover:bg-slate-700 text-white font-black py-4 rounded-2xl transition-all border border-slate-700 active:scale-[0.98]">
+              <button
+                type="button"
+                disabled={effectiveStatus === "sold"}
+                onClick={() => {
+                  if (effectiveStatus === "sold") {
+                    setActionMessage("No puedes hacer ofertas en un listing vendido.");
+                    return;
+                  }
+                  setActionMessage("Oferta simulada enviada.");
+                }}
+                className="flex items-center justify-center gap-3 bg-slate-800 hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-50 text-white font-black py-4 rounded-2xl transition-all border border-slate-700 active:scale-[0.98]"
+              >
                 Make an Offer
               </button>
             </div>
+
+            {isOwner && foundListing && (
+              <div className="mt-6 rounded-3xl border border-slate-800 bg-[#1e293b]/40 p-5">
+                <h3 className="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4">
+                  Manage listing state
+                </h3>
+                <div className="flex flex-wrap gap-3">
+                  <button
+                    type="button"
+                    onClick={() => handleStatusChange("reserved")}
+                    disabled={!canTransitionStatus(effectiveStatus as "available" | "reserved" | "sold", "reserved")}
+                    className="rounded-xl bg-amber-500/15 px-4 py-2 text-sm font-bold text-amber-300 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Mark as reserved
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleStatusChange("sold")}
+                    disabled={!canTransitionStatus(effectiveStatus as "available" | "reserved" | "sold", "sold")}
+                    className="rounded-xl bg-emerald-500/15 px-4 py-2 text-sm font-bold text-emerald-300 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Mark as sold
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleStatusChange("available")}
+                    disabled={!canTransitionStatus(effectiveStatus as "available" | "reserved" | "sold", "available")}
+                    className="rounded-xl bg-slate-700 px-4 py-2 text-sm font-bold text-slate-200 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Return to available
+                  </button>
+                </div>
+                <p className="mt-3 text-xs text-slate-500">
+                  Se permite pasar de available a reserved o sold, y de reserved a available o sold. Un listing vendido no puede volver a un estado anterior.
+                </p>
+              </div>
+            )}
           </div>
 
         </div>

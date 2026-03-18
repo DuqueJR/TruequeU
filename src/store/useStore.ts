@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { Listing, User } from '../types.ts';
+import { Items } from '../data/items';
 
 /** Referencia estable para cuando no hay favoritos (evita bucle infinito en useSyncExternalStore) */
 export const EMPTY_FAVORITES: readonly string[] = [];
@@ -27,6 +28,7 @@ export interface Chat {
 
 interface StoreState {
   listings: Listing[];
+  listingStatusOverrides: Record<string, Listing['status']>;
   user: User | null;
   registeredUsers: RegisteredUser[];
   favoritesByUser: Record<string, string[]>;
@@ -34,6 +36,7 @@ interface StoreState {
   chats: Record<string, Chat>;
   addListing: (item: Listing) => void;
   updateStatus: (id: string, status: Listing['status']) => void;
+  canTransitionStatus: (current: Listing['status'], next: Listing['status']) => boolean;
   toggleFavorite: (id: string) => void;
   addRegisteredUser: (user: RegisteredUser) => void;
   login: (userData: User) => void;
@@ -47,6 +50,7 @@ export const useStore = create<StoreState>()(
   persist(
     (set, get) => ({
     listings: [],
+    listingStatusOverrides: {},
     user: null,
     registeredUsers: [],
     favoritesByUser: {},
@@ -58,12 +62,33 @@ export const useStore = create<StoreState>()(
           listings: [item, ...state.listings],
         })),
 
+      canTransitionStatus: (current, next) => {
+        if (current === next) return true;
+        if (current === "available") return next === "reserved" || next === "sold";
+        if (current === "reserved") return next === "available" || next === "sold";
+        return false;
+      },
+
       updateStatus: (id, status) =>
-        set((state) => ({
-          listings: state.listings.map((l) =>
-            l.id === id ? { ...l, status } : l
-          ),
-        })),
+        set((state) => {
+          const target = state.listings.find((l) => l.id === id);
+          const baseListing = Items.find((l) => l.id === id);
+          const fallbackStatus = state.listingStatusOverrides[id];
+          const currentStatus = target?.status ?? fallbackStatus ?? baseListing?.status;
+          if (!currentStatus) return state;
+          const canTransition = (state as StoreState).canTransitionStatus(currentStatus, status);
+          if (!canTransition) return state;
+          if (currentStatus === "sold" && status === "available") return state;
+          return {
+            listings: state.listings.map((l) =>
+              l.id === id ? { ...l, status } : l
+            ),
+            listingStatusOverrides: {
+              ...state.listingStatusOverrides,
+              [id]: status,
+            },
+          };
+        }),
 
       toggleFavorite: (id) =>
         set((state) => {
@@ -127,6 +152,7 @@ export const useStore = create<StoreState>()(
       name: 'marketplace-storage',
       partialize: (state) => ({
         listings: state.listings,
+        listingStatusOverrides: state.listingStatusOverrides,
         user: state.user,
         registeredUsers: state.registeredUsers,
         favoritesByUser: state.favoritesByUser,

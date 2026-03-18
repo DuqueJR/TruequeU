@@ -15,7 +15,7 @@ export default function ChatPage() {
   const [newMessage, setNewMessage] = useState("");
 
   const storeListings = useStore((state) => state.listings);
-  const allListings = [...Items, ...storeListings];
+  const allListings = [...storeListings, ...Items];
 
   useEffect(() => {
     if (!chatId || !currentUser) return;

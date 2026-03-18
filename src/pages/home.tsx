@@ -10,7 +10,7 @@ export default function HomePage() {
   const storeListings = useStore((state) => state.listings)
   const user = useStore((state) => state.user)
 
-  const listings = [...Items, ...storeListings]
+  const listings = [...storeListings, ...Items]
   const featuredListings = listings.slice(0, FEATURED_COUNT)
 
   return (

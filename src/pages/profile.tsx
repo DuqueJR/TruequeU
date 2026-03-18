@@ -7,7 +7,7 @@ export default function ProfilePage() {
   const user = useStore((state) => state.user);
   const logout = useStore((state) => state.logout);
   const storeListings = useStore((state) => state.listings);
-  const allListings = [...Items, ...storeListings];
+  const allListings = [...storeListings, ...Items];
   const myListings = user ? allListings.filter((l) => l.ownerId === user.id) : [];
 
   if (!user) {
