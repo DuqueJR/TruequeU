@@ -1,6 +1,9 @@
+import { useEffect } from "react"
+import { Routes, Route } from "react-router-dom"
+import { useStore } from "./store/useStore"
+import { apiGetCurrentUser } from "./api/client"
 import CreateListing from "./pages/create-listing"
 import ListingDetail from "./pages/listing-details"
-import { Routes, Route } from "react-router-dom"
 import Home from "./pages/home"
 import Listings from "./pages/listings"
 import Favorites from "./pages/favorites"
@@ -12,6 +15,15 @@ import Profile from "./pages/profile"
 import NotFound from "./pages/not-found"
 
 function App() {
+  const login = useStore((state) => state.login)
+  const logout = useStore((state) => state.logout)
+
+  useEffect(() => {
+    apiGetCurrentUser()
+      .then((user) => login(user))
+      .catch(() => logout())
+  }, [])
+
   return (
     <div className="flex min-h-screen flex-col">
       <Navbar />
