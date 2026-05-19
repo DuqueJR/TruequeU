@@ -12,6 +12,7 @@ import Navbar from "./components/layout/Navbar"
 import Signup from "./pages/sign-up"
 import Chat from "./pages/chat"
 import Profile from "./pages/profile"
+import AdminDashboard from "./pages/admin-dashboard"
 import NotFound from "./pages/not-found"
 
 function App() {
@@ -22,6 +23,7 @@ function App() {
     apiGetCurrentUser()
       .then((user) => login(user))
       .catch(() => logout())
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
@@ -39,6 +41,7 @@ function App() {
           <Route path="/chat" element={<Chat />} />
           <Route path="/chat/:chatId" element={<Chat />} />
           <Route path="/profile" element={<Profile />} />
+          <Route path="/admin" element={<AdminDashboard />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>

@@ -11,6 +11,7 @@ import {
   apiMarkListingAvailable,
   ApiError,
 } from "../api/client"
+import ReportForm from "../components/ReportForm"
 import type { Listing, User } from "../types"
 
 export default function ListingDetailsPage() {
@@ -24,6 +25,7 @@ export default function ListingDetailsPage() {
   const [activeImage, setActiveImage] = useState(0)
   const [isFavorite, setIsFavorite] = useState(false)
   const [statusUpdating, setStatusUpdating] = useState(false)
+  const [showReport, setShowReport] = useState(false)
 
   useEffect(() => {
     if (!id) return
@@ -67,7 +69,7 @@ export default function ListingDetailsPage() {
         setIsFavorite(true)
       }
     } catch {
-      // ignore
+      /* ignore */
     }
   }
 
@@ -80,7 +82,7 @@ export default function ListingDetailsPage() {
       else if (action === "reserved") updated = await apiMarkListingReserved(id)
       else updated = await apiMarkListingAvailable(id)
       setListing(updated)
-    } catch (err) {
+    } catch {
       // could show error toast
     } finally {
       setStatusUpdating(false)
@@ -273,6 +275,7 @@ export default function ListingDetailsPage() {
               {currentUser && !isOwner && (
                 <button
                   type="button"
+                  onClick={() => setShowReport(true)}
                   className="flex items-center justify-center gap-3 bg-slate-800 hover:bg-slate-700 text-white font-black py-4 rounded-2xl transition-all border border-slate-700 active:scale-[0.98]"
                 >
                   Report
@@ -281,6 +284,14 @@ export default function ListingDetailsPage() {
             </div>
           </div>
         </div>
+
+        {showReport && currentUser && (
+          <ReportForm
+            reportedUserId={listing.ownerId}
+            reportedListingId={listing.id}
+            onClose={() => setShowReport(false)}
+          />
+        )}
       </div>
     </div>
   )

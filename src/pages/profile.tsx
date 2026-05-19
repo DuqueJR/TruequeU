@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { useStore } from "../store/useStore"
-import { apiGetMyListings, apiLogout, ApiError } from "../api/client"
+import { apiGetMyListings, apiLogout } from "../api/client"
 import type { Listing } from "../types"
 
 export default function ProfilePage() {
@@ -13,6 +13,7 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!user) return
     let cancelled = false
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true)
     apiGetMyListings()
       .then((data) => {

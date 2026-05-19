@@ -13,6 +13,7 @@ export default function HomePage() {
 
   useEffect(() => {
     let cancelled = false
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true)
     apiGetListings({ page: 1, pageSize: FEATURED_COUNT })
       .then((res) => {

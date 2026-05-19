@@ -31,11 +31,11 @@ export default function Profile() {
       <div className="flex items-center gap-4 mb-4">
         <img
           src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`}
-          alt={user.name}
+          alt={user.fullName || user.username}
           className="w-14 h-14 rounded-full bg-indigo-500/20 p-1 border border-slate-700"
         />
         <div className="min-w-0">
-          <h4 className="text-white font-bold truncate">{user.name}</h4>
+          <h4 className="text-white font-bold truncate">{user.fullName || user.username}</h4>
           <p className="text-slate-400 text-xs truncate">{user.email}</p>
         </div>
       </div>
