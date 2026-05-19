@@ -1,76 +1,100 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import { useStore } from "../store/useStore";
-import { validateListing } from "../services/listing.service";
-import { apiCreateListing } from "../api/client";
+import { useState } from "react"
+import { useNavigate, Link } from "react-router-dom"
+import { useStore } from "../store/useStore"
+import { validateListing } from "../services/listing.service"
+import { apiCreateListing, ApiError } from "../api/client"
+import { categoryToEnum, conditionToEnum } from "../api/mappers"
+
+const CATEGORIES = ["Books", "Electronics", "Furniture", "Clothing", "Other"] as const
+const CONDITIONS = ["New", "LikeNew", "UsedGood", "UsedFair"] as const
 
 export default function CreateListingPage() {
-  const navigate = useNavigate();
-  const user = useStore((state) => state.user);
-  const addListing = useStore((state) => state.addListing);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  //Estado del formulario para controlar los inputs
+  const navigate = useNavigate()
+  const user = useStore((state) => state.user)
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
+
   const [formData, setFormData] = useState({
     title: "",
     price: "",
     category: "Electronics",
-    condition: "Good",
+    condition: "UsedGood",
     description: "",
-    image: null as string | null,
-  });
+    campusLocation: "",
+    imageUrls: [""],
+  })
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    setError("");
-  };
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>,
+  ) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value })
+    setError("")
+  }
 
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => setFormData({ ...formData, image: reader.result as string });
-      reader.readAsDataURL(file);
-    }
-  };
+  const handleImageUrlChange = (index: number, value: string) => {
+    const urls = [...formData.imageUrls]
+    urls[index] = value
+    setFormData({ ...formData, imageUrls: urls })
+  }
+
+  const addImageUrl = () => {
+    setFormData({ ...formData, imageUrls: [...formData.imageUrls, ""] })
+  }
+
+  const removeImageUrl = (index: number) => {
+    const urls = formData.imageUrls.filter((_, i) => i !== index)
+    setFormData({ ...formData, imageUrls: urls.length > 0 ? urls : [""] })
+  }
+
+  const validImageUrls = formData.imageUrls.filter((url) => url.trim().length > 0)
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!user) return;
-    setError("");
+    e.preventDefault()
+    if (!user) return
+    setError("")
+
     const validation = validateListing({
       title: formData.title,
       description: formData.description,
       price: formData.price,
-    });
+    })
     if (!validation.valid) {
-      setError(validation.message);
-      return;
+      setError(validation.message)
+      return
     }
-    setLoading(true);
+
+    if (!formData.campusLocation.trim()) {
+      setError("Campus location is required.")
+      return
+    }
+
+    if (validImageUrls.length < 3) {
+      setError("At least 3 image URLs are required.")
+      return
+    }
+
+    setLoading(true)
     try {
-      const result = await apiCreateListing({
+      const listing = await apiCreateListing({
         title: formData.title,
         description: formData.description,
         price: Number(formData.price),
-        category: formData.category,
-        condition: formData.condition,
-        status: "available",
-        images: formData.image ? [formData.image] : ["https://via.placeholder.com/400"],
-        ownerId: user.id,
-      });
-      if (result.data) {
-        addListing(result.data);
-        navigate("/");
+        category: categoryToEnum(formData.category),
+        condition: conditionToEnum(formData.condition),
+        campusLocation: formData.campusLocation,
+        imageUrls: validImageUrls,
+      })
+      navigate(`/listing/${listing.id}`)
+    } catch (err) {
+      if (err instanceof ApiError) {
+        setError(err.message)
       } else {
-        setError(result.error ?? "Error al publicar");
+        setError("Connection error. Try again.")
       }
-    } catch {
-      setError("Error de conexión. Intenta de nuevo.");
     } finally {
-      setLoading(false);
+      setLoading(false)
     }
-  };
+  }
 
   if (!user) {
     return (
@@ -80,7 +104,7 @@ export default function CreateListingPage() {
           <Link to="/login" className="text-indigo-400 font-bold hover:text-indigo-300">Log In</Link>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -99,11 +123,9 @@ export default function CreateListingPage() {
               <p className="text-red-400 text-sm bg-red-500/10 px-4 py-2 rounded-xl">{error}</p>
             </div>
           )}
-          {/* COLUMNA IZQUIERDA: Formulario (3/5) */}
+
           <div className="lg:col-span-3 space-y-6">
             <div className="bg-[#1e293b]/40 backdrop-blur-xl border border-slate-800 p-8 rounded-[2.5rem] shadow-2xl space-y-5">
-              
-              {/* Título */}
               <div>
                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Item Title</label>
                 <input
@@ -119,7 +141,6 @@ export default function CreateListingPage() {
               </div>
 
               <div className="grid grid-cols-2 gap-4">
-                {/* Precio */}
                 <div>
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Price ($)</label>
                   <input
@@ -134,25 +155,50 @@ export default function CreateListingPage() {
                     className="w-full bg-slate-900/60 border border-slate-700 text-white rounded-2xl px-4 py-3.5 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none transition-all"
                     placeholder="0.00"
                   />
-                  <p className="text-slate-500 text-[10px] mt-1 ml-1">Mín. $0, máx. $999,999</p>
                 </div>
-                {/* Categoría */}
                 <div>
                   <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Category</label>
                   <select
                     name="category"
+                    value={formData.category}
                     onChange={handleChange}
                     className="w-full bg-slate-900/60 border border-slate-700 text-slate-300 rounded-2xl px-4 py-3.5 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none transition-all appearance-none"
                   >
-                    <option>Electronics</option>
-                    <option>Books</option>
-                    <option>Services</option>
-                    <option>Other</option>
+                    {CATEGORIES.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
                   </select>
                 </div>
               </div>
 
-              {/* Descripción */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Condition</label>
+                  <select
+                    name="condition"
+                    value={formData.condition}
+                    onChange={handleChange}
+                    className="w-full bg-slate-900/60 border border-slate-700 text-slate-300 rounded-2xl px-4 py-3.5 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none transition-all appearance-none"
+                  >
+                    {CONDITIONS.map((c) => (
+                      <option key={c} value={c}>{c}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Campus Location</label>
+                  <input
+                    name="campusLocation"
+                    type="text"
+                    required
+                    value={formData.campusLocation}
+                    onChange={handleChange}
+                    className="w-full bg-slate-900/60 border border-slate-700 text-white rounded-2xl px-4 py-3.5 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none transition-all"
+                    placeholder="Main Campus Building A"
+                  />
+                </div>
+              </div>
+
               <div>
                 <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Description</label>
                 <textarea
@@ -170,57 +216,66 @@ export default function CreateListingPage() {
             </div>
           </div>
 
-          {/* COLUMNA DERECHA: Imagen y Submit (2/5) */}
           <div className="lg:col-span-2 space-y-6">
             <div className="bg-[#1e293b]/40 backdrop-blur-xl border border-slate-800 p-8 rounded-[2.5rem] shadow-2xl">
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-4 text-center">Product Image</label>
-              
-              <div 
-                className={`relative aspect-square rounded-3xl border-2 border-dashed transition-all flex flex-col items-center justify-center overflow-hidden
-                  ${formData.image ? "border-indigo-500" : "border-slate-700 hover:border-slate-500"}`}
-              >
-                {formData.image ? (
-                  <>
-                    <img src={formData.image} className="w-full h-full object-cover" />
-                    <button 
-                      onClick={() => setFormData({...formData, image: null})}
-                      className="absolute top-2 right-2 bg-red-500 p-2 rounded-full text-white hover:bg-red-600 transition-colors"
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
-                    </button>
-                  </>
-                ) : (
-                  <div className="text-center p-6">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-slate-600 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                    <p className="text-slate-500 text-sm">Drop your image here or</p>
-                    <label className="text-indigo-400 font-bold cursor-pointer hover:text-indigo-300 transition-colors">
-                      Browse files
-                      <input type="file" className="hidden" accept="image/*" onChange={handleImageChange} />
-                    </label>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-4 text-center">
+                Product Images ({validImageUrls.length} / min 3)
+              </label>
+
+              <div className="space-y-3">
+                {formData.imageUrls.map((url, index) => (
+                  <div key={index} className="flex gap-2 items-start">
+                    <div className="flex-1">
+                      <input
+                        type="url"
+                        value={url}
+                        onChange={(e) => handleImageUrlChange(index, e.target.value)}
+                        placeholder={`https://example.com/image${index + 1}.jpg`}
+                        className="w-full bg-slate-900/60 border border-slate-700 text-white text-sm rounded-xl px-3 py-2.5 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none transition-all"
+                      />
+                      {url.trim() && url.startsWith("http") && (
+                        <img
+                          src={url}
+                          alt={`Preview ${index + 1}`}
+                          className="mt-2 w-full h-24 object-cover rounded-xl bg-slate-800"
+                          onError={(e) => { (e.target as HTMLImageElement).style.display = "none" }}
+                        />
+                      )}
+                    </div>
+                    {formData.imageUrls.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeImageUrl(index)}
+                        className="mt-1 p-2 text-slate-500 hover:text-red-400 transition-colors"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    )}
                   </div>
-                )}
+                ))}
               </div>
+
+              <button
+                type="button"
+                onClick={addImageUrl}
+                className="mt-3 w-full py-2 rounded-xl border border-dashed border-slate-600 text-slate-400 text-sm hover:border-indigo-500 hover:text-indigo-400 transition-all"
+              >
+                + Add another image
+              </button>
 
               <button
                 type="submit"
                 disabled={loading}
                 className="w-full mt-8 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-black py-4 rounded-2xl transition-all shadow-xl shadow-indigo-500/20 active:scale-95"
               >
-                {loading ? "Publicando..." : "Publish Listing"}
+                {loading ? "Publishing..." : "Publish Listing"}
               </button>
-              
-              <p className="text-[10px] text-slate-500 text-center mt-4 leading-tight">
-                By publishing, you agree to our Campus Trading Guidelines.
-              </p>
             </div>
           </div>
-
         </form>
       </div>
     </div>
-  );
+  )
 }

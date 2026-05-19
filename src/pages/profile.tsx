@@ -1,14 +1,40 @@
-import { Link } from "react-router-dom";
-import { useStore } from "../store/useStore";
-import { Items } from "../data/items";
-import ListingList from "../components/listings/ListingList";
+import { useState, useEffect } from "react"
+import { Link } from "react-router-dom"
+import { useStore } from "../store/useStore"
+import { apiGetMyListings, apiLogout, ApiError } from "../api/client"
+import type { Listing } from "../types"
 
 export default function ProfilePage() {
-  const user = useStore((state) => state.user);
-  const logout = useStore((state) => state.logout);
-  const storeListings = useStore((state) => state.listings);
-  const allListings = [...storeListings, ...Items];
-  const myListings = user ? allListings.filter((l) => l.ownerId === user.id) : [];
+  const user = useStore((state) => state.user)
+  const logout = useStore((state) => state.logout)
+  const [listings, setListings] = useState<Listing[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (!user) return
+    let cancelled = false
+    setLoading(true)
+    apiGetMyListings()
+      .then((data) => {
+        if (!cancelled) setListings(data)
+      })
+      .catch(() => {
+        if (!cancelled) setListings([])
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+    return () => { cancelled = true }
+  }, [user])
+
+  const handleLogout = async () => {
+    try {
+      await apiLogout()
+    } catch {
+      // ignore
+    }
+    logout()
+  }
 
   if (!user) {
     return (
@@ -36,7 +62,7 @@ export default function ProfilePage() {
           </div>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -47,14 +73,18 @@ export default function ProfilePage() {
             <div className="flex items-center gap-6">
               <img
                 src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${user.id}`}
-                alt={user.name}
+                alt={user.username}
                 className="w-20 h-20 rounded-full bg-indigo-500/20 p-1 border-2 border-slate-700"
               />
               <div>
                 <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight">
-                  {user.name}
+                  {user.fullName || user.username}
                 </h1>
                 <p className="text-slate-400">{user.email}</p>
+                {user.program && (
+                  <p className="text-slate-500 text-sm">{user.program}</p>
+                )}
+                <p className="text-slate-500 text-xs mt-1">Rating: {user.rating}</p>
               </div>
             </div>
             <div className="flex gap-3">
@@ -65,7 +95,7 @@ export default function ProfilePage() {
                 + New Listing
               </Link>
               <button
-                onClick={() => logout()}
+                onClick={handleLogout}
                 className="px-5 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium rounded-xl border border-slate-700 transition-all"
               >
                 Sign Out
@@ -76,8 +106,44 @@ export default function ProfilePage() {
 
         <section>
           <h2 className="text-xl font-bold text-white mb-6">My Listings</h2>
-          {myListings.length > 0 ? (
-            <ListingList listings={myListings} />
+          {loading ? (
+            <div className="flex justify-center py-12">
+              <div className="inline-block h-8 w-8 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
+            </div>
+          ) : listings.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {listings.map((listing) => (
+                <Link
+                  key={listing.id}
+                  to={`/listing/${listing.id}`}
+                  className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-800 bg-[#1e293b]/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-indigo-500/50"
+                >
+                  <div className="aspect-square w-full overflow-hidden bg-slate-800">
+                    <img
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
+                      src={listing.images[0]?.url || "https://via.placeholder.com/400"}
+                      alt={listing.title}
+                    />
+                    <div className="absolute top-3 left-3">
+                      <span className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-lg ${
+                        listing.status === "available" ? "bg-emerald-500/90" :
+                        listing.status === "reserved" ? "bg-amber-500/90" :
+                        listing.status === "sold" ? "bg-red-500/90" :
+                        "bg-slate-500/90"
+                      }`}>
+                        {listing.status}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex flex-1 flex-col p-4">
+                    <h3 className="line-clamp-1 text-sm font-semibold text-slate-100 group-hover:text-indigo-400 transition-colors">
+                      {listing.title}
+                    </h3>
+                    <p className="mt-auto text-lg font-black text-white pt-2">${listing.price}</p>
+                  </div>
+                </Link>
+              ))}
+            </div>
           ) : (
             <div className="bg-[#1e293b]/20 border border-slate-800 rounded-2xl p-12 text-center">
               <p className="text-slate-400 mb-4">You haven't published any listings yet.</p>
@@ -92,5 +158,5 @@ export default function ProfilePage() {
         </section>
       </div>
     </div>
-  );
+  )
 }
