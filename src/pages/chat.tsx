@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react"
-import { useParams, useSearchParams, Link } from "react-router-dom"
+import { useParams, useSearchParams } from "react-router-dom"
 import { useStore } from "../store/useStore"
 import {
   apiGetConversations,
@@ -10,6 +10,7 @@ import {
   apiGetUser,
 } from "../api/client"
 import type { Conversation, Message as MessageType, User } from "../types"
+import AuthGuard from "../components/AuthGuard"
 
 export default function ChatPage() {
   const { chatId } = useParams()
@@ -85,16 +86,7 @@ export default function ChatPage() {
   }
 
   if (!currentUser) {
-    return (
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
-        <div className="text-center">
-          <p className="text-brand-text mb-4">Log in to see your chats.</p>
-          <Link to="/login" className="text-brand-accent font-bold hover:text-brand-accent/80">
-            Log In
-          </Link>
-        </div>
-      </div>
-    )
+    return <AuthGuard heading="Sign in to see your chats" description="Chat with sellers and buyers about your listings." />
   }
 
   return (

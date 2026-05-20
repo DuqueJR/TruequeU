@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
-import { Link } from "react-router-dom"
 import { useStore } from "../store/useStore"
+import AuthGuard from "../components/AuthGuard"
 import {
   apiGetReports,
   apiResolveReport,
@@ -19,16 +19,7 @@ export default function AdminDashboardPage() {
   const [tab, setTab] = useState<Tab>("reports")
 
   if (!user) {
-    return (
-      <div className="flex-1 flex items-center justify-center px-6 py-24">
-        <div className="text-center">
-          <p className="text-brand-text mb-4">You must be logged in to access this page.</p>
-          <Link to="/login" className="text-brand-accent font-bold hover:text-brand-accent/80">
-            Log In
-          </Link>
-        </div>
-      </div>
-    )
+    return <AuthGuard heading="Sign in to continue" description="You must be logged in to access this page." showSignUp={false} />
   }
 
   return (

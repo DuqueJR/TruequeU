@@ -3,6 +3,7 @@ import { Link } from "react-router-dom"
 import { useStore } from "../store/useStore"
 import { apiGetFavorites, apiRemoveFavorite } from "../api/client"
 import type { Favorite } from "../types"
+import AuthGuard from "../components/AuthGuard"
 
 export default function FavoritesPage() {
   const user = useStore((state) => state.user)
@@ -29,20 +30,7 @@ export default function FavoritesPage() {
   }, [user])
 
   if (!user) {
-    return (
-      <div className="flex-1 flex items-center justify-center px-6 py-24">
-        <div className="text-center max-w-md">
-          <h2 className="text-xl font-bold text-brand-header mb-4">Sign in to see your favorites</h2>
-          <p className="text-brand-text mb-6">Favorites are saved per account.</p>
-          <Link
-            to="/login"
-            className="inline-block px-6 py-3 bg-brand-accent hover:bg-brand-accent/90 text-white font-bold rounded-xl transition-all"
-          >
-            Sign in
-          </Link>
-        </div>
-      </div>
-    )
+    return <AuthGuard heading="Sign in to see your favorites" description="Favorites are saved per account." />
   }
 
   if (loading) {

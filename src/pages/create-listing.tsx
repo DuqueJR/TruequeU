@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom"
 import { useStore } from "../store/useStore"
 import { apiCreateListing } from "../api/client"
 import { categories, conditions, validateListing } from "../services/listing.service"
+import AuthGuard from "../components/AuthGuard"
 
 export default function CreateListingPage() {
   const user = useStore((state) => state.user)
@@ -81,14 +82,7 @@ export default function CreateListingPage() {
   }
 
   if (!user) {
-    return (
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
-        <div className="text-center">
-          <p className="text-brand-text mb-4">You have to log in to create a listing.</p>
-          <Link to="/login" className="text-brand-accent font-bold hover:text-brand-accent/80">Log In</Link>
-        </div>
-      </div>
-    )
+    return <AuthGuard heading="Sign in to create a listing" description="Create an account or sign in to start trading." />
   }
 
   return (

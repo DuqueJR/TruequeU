@@ -3,6 +3,7 @@ import { Link } from "react-router-dom"
 import { useStore } from "../store/useStore"
 import { apiGetMyListings, apiLogout } from "../api/client"
 import type { Listing } from "../types"
+import AuthGuard from "../components/AuthGuard"
 
 export default function ProfilePage() {
   const user = useStore((state) => state.user)
@@ -37,32 +38,7 @@ export default function ProfilePage() {
   }
 
   if (!user) {
-    return (
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
-        <div className="text-center max-w-md">
-          <h2 className="text-2xl font-black text-brand-header mb-4">
-            Sign in to view your profile
-          </h2>
-          <p className="text-brand-text mb-6">
-            Create an account or sign in to manage your listings and profile.
-          </p>
-          <div className="flex gap-4 justify-center">
-            <Link
-              to="/login"
-              className="px-6 py-3 bg-brand-accent hover:bg-brand-accent/90 text-white font-bold rounded-xl transition-all"
-            >
-              Sign In
-            </Link>
-            <Link
-              to="/signup"
-              className="px-6 py-3 bg-brand-surface-secondary hover:bg-brand-surface-secondary/80 text-brand-header/80 font-bold rounded-xl border border-brand-input-border transition-all"
-            >
-              Sign Up
-            </Link>
-          </div>
-        </div>
-      </div>
-    )
+    return <AuthGuard heading="Sign in to view your profile" description="Create an account or sign in to manage your listings and profile." />
   }
 
   return (
