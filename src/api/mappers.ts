@@ -82,7 +82,7 @@ export function mapListingFromApi(raw: Record<string, unknown>): Listing {
       : raw.createdAt != null
         ? String(raw.createdAt)
         : undefined,
-    isFavorite: false,
+    isFavorite: Boolean(raw.IsFavorite ?? raw.isFavorite ?? false),
     campusLocation: String(raw.CampusLocation ?? raw.campusLocation ?? ''),
   }
 }
