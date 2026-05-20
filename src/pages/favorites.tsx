@@ -1,13 +1,14 @@
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { useStore } from "../store/useStore"
-import { apiGetFavorites } from "../api/client"
-import type { Favorite } from "../types"
+import { apiGetFavorites, apiGetListing } from "../api/client"
+import type { Listing } from "../types"
 import AuthGuard from "../components/AuthGuard"
+import ListingCard from "../components/listings/ListingCard"
 
 export default function FavoritesPage() {
   const user = useStore((state) => state.user)
-  const [favorites, setFavorites] = useState<Favorite[]>([])
+  const [listings, setListings] = useState<Listing[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -18,8 +19,16 @@ export default function FavoritesPage() {
     setLoading(true)
     setError(null)
     apiGetFavorites()
-      .then((data) => {
-        if (!cancelled) setFavorites(data)
+      .then(async (favs) => {
+        if (cancelled) return
+        if (favs.length === 0) {
+          setListings([])
+          return
+        }
+        const fetched = await Promise.all(
+          favs.map((fav) => apiGetListing(fav.listingId))
+        )
+        if (!cancelled) setListings(fetched)
       })
       .catch((err) => {
         if (!cancelled) setError(err instanceof Error ? err.message : "Error loading favorites")
@@ -65,13 +74,13 @@ export default function FavoritesPage() {
           My favorites
         </h1>
         <p className="text-brand-text text-sm">
-          {favorites.length > 0
-            ? `${favorites.length} ${favorites.length === 1 ? "item" : "items"} saved`
+          {listings.length > 0
+            ? `${listings.length} ${listings.length === 1 ? "item" : "items"} saved`
             : "Save listings to see them here."}
         </p>
       </div>
 
-      {favorites.length === 0 ? (
+      {listings.length === 0 ? (
         <div className="mx-auto max-w-7xl px-6 py-12">
           <div className="bg-brand-surface/20 border border-brand-border rounded-2xl p-12 text-center">
             <p className="text-brand-text mb-4">You have no favorites yet. Browse listings and mark the ones you're interested in.</p>
@@ -89,25 +98,8 @@ export default function FavoritesPage() {
       ) : (
         <div className="mx-auto max-w-7xl px-6 py-8">
           <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {favorites.map((fav) => (
-              <Link
-                key={fav.id}
-                to={`/listing/${fav.listingId}`}
-                className="group relative flex flex-col overflow-hidden rounded-2xl border border-brand-border bg-brand-surface/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-brand-accent/50 hover:shadow-[0_8px_30px_rgb(0,0,0,0.4)] p-5"
-              >
-                <span className={`self-start px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider mb-3 ${
-                  fav.listingState === "available" ? "bg-emerald-500/20 text-emerald-400" :
-                  fav.listingState === "reserved" ? "bg-amber-500/20 text-amber-400" :
-                  "bg-red-500/20 text-red-400"
-                }`}>
-                  {fav.listingState}
-                </span>
-                <h3 className="line-clamp-2 text-sm font-semibold text-brand-header/90 group-hover:text-brand-accent transition-colors mb-2">
-                  {fav.listingTitle}
-                </h3>
-                <span className="text-xs text-brand-text/70 mb-2">{fav.listingCategory}</span>
-                <p className="mt-auto text-lg font-black text-brand-header">${fav.listingPrice}</p>
-              </Link>
+            {listings.map((listing) => (
+              <ListingCard key={listing.id} listing={listing} />
             ))}
           </section>
         </div>
