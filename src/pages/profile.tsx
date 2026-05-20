@@ -15,6 +15,7 @@ export default function ProfilePage() {
   useEffect(() => {
     if (!user) return
     let cancelled = false
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true)
     apiGetMyListings()
       .then((data) => {

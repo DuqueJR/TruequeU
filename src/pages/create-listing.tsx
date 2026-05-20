@@ -50,11 +50,7 @@ export default function CreateListingPage() {
     const validation = validateListing({
       title: formData.title,
       description: formData.description,
-      price: Number(formData.price),
-      category: formData.category,
-      condition: formData.condition,
-      campusLocation: formData.campusLocation,
-      imageUrls: filteredUrls,
+      price: formData.price,
     })
     if (!validation.valid) {
       setError(validation.message)
@@ -147,7 +143,7 @@ export default function CreateListingPage() {
                 className="w-full bg-brand-input/60 border border-brand-input-border text-brand-header rounded-2xl px-4 py-3.5 focus:ring-2 focus:ring-brand-accent/50 focus:outline-none transition-all"
               >
                 <option value="">Select category</option>
-                {categories.map((c) => (
+                {categories.map((c: string) => (
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>
@@ -165,7 +161,7 @@ export default function CreateListingPage() {
                 className="w-full bg-brand-input/60 border border-brand-input-border text-brand-header rounded-2xl px-4 py-3.5 focus:ring-2 focus:ring-brand-accent/50 focus:outline-none transition-all"
               >
                 <option value="">Select condition</option>
-                {conditions.map((c) => (
+                {conditions.map((c: string) => (
                   <option key={c} value={c}>{c}</option>
                 ))}
               </select>

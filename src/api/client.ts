@@ -12,12 +12,14 @@ import {
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5274/api'
 
 export class ApiError extends Error {
+  status: number
   constructor(
-    public status: number,
+    status: number,
     message: string,
   ) {
     super(message)
     this.name = 'ApiError'
+    this.status = status
   }
 }
 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { useStore } from "../store/useStore"
-import { apiGetFavorites, apiRemoveFavorite } from "../api/client"
+import { apiGetFavorites } from "../api/client"
 import type { Favorite } from "../types"
 import AuthGuard from "../components/AuthGuard"
 
@@ -14,6 +14,7 @@ export default function FavoritesPage() {
   useEffect(() => {
     if (!user) return
     let cancelled = false
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true)
     setError(null)
     apiGetFavorites()

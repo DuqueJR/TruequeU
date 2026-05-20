@@ -4,7 +4,6 @@ import { useStore } from "../store/useStore"
 import {
   apiGetConversations,
   apiGetConversation,
-  apiCreateConversation,
   apiGetMessages,
   apiSendMessage,
   apiGetUser,

@@ -3,6 +3,10 @@ export interface ListingValidation {
   message: string;
 }
 
+export const categories: string[] = ["Books", "Electronics", "Furniture", "Clothing", "Other"]
+
+export const conditions: string[] = ["New", "LikeNew", "UsedGood", "UsedFair"]
+
 const TITLE_MIN = 3;
 const TITLE_MAX = 100;
 const DESCRIPTION_MIN = 10;
