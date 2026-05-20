@@ -3,6 +3,7 @@ import { Link } from "react-router-dom"
 import { useStore } from "../store/useStore"
 import { apiGetListings } from "../api/client"
 import type { Listing } from "../types"
+import ListingCard from "../components/listings/ListingCard"
 
 const FEATURED_COUNT = 6
 
@@ -78,34 +79,7 @@ export default function HomePage() {
         ) : featured.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
             {featured.map((listing) => (
-              <Link
-                key={listing.id}
-                to={`/listing/${listing.id}`}
-                className="group relative flex flex-col overflow-hidden rounded-2xl border border-brand-border bg-brand-surface/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-brand-accent/50 hover:shadow-[0_8px_30px_rgb(0,0,0,0.4)]"
-              >
-                <div className="aspect-square w-full overflow-hidden bg-brand-surface-secondary">
-                  <img
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                    src={listing.images[0]?.url || "https://via.placeholder.com/400"}
-                    alt={listing.title}
-                  />
-                  <div className="absolute top-3 left-3">
-                    <span className="rounded-full bg-brand-accent/90 backdrop-blur-md px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-lg">
-                      {listing.status}
-                    </span>
-                  </div>
-                </div>
-                <div className="flex flex-1 flex-col p-4">
-                  <div className="mb-1 flex items-start justify-between gap-2">
-                    <h3 className="line-clamp-1 text-sm font-semibold text-brand-header/90 group-hover:text-brand-accent transition-colors">
-                      {listing.title}
-                    </h3>
-                    <p className="whitespace-nowrap text-lg font-black text-brand-header">
-                      ${listing.price.toLocaleString()}
-                    </p>
-                  </div>
-                </div>
-              </Link>
+              <ListingCard key={listing.id} listing={listing} />
             ))}
           </div>
         ) : (
