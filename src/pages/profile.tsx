@@ -4,6 +4,7 @@ import { useStore } from "../store/useStore"
 import { apiGetMyListings, apiLogout } from "../api/client"
 import type { Listing } from "../types"
 import AuthGuard from "../components/AuthGuard"
+import ListingCard from "../components/listings/ListingCard"
 
 export default function ProfilePage() {
   const user = useStore((state) => state.user)
@@ -89,35 +90,7 @@ export default function ProfilePage() {
           ) : listings.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
               {listings.map((listing) => (
-                <Link
-                  key={listing.id}
-                  to={`/listing/${listing.id}`}
-                  className="group relative flex flex-col overflow-hidden rounded-2xl border border-brand-border bg-brand-surface/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-brand-accent/50"
-                >
-                  <div className="aspect-square w-full overflow-hidden bg-brand-surface-secondary">
-                    <img
-                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
-                      src={listing.images[0]?.url || "https://via.placeholder.com/400"}
-                      alt={listing.title}
-                    />
-                    <div className="absolute top-3 left-3">
-                      <span className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-white shadow-lg ${
-                        listing.status === "available" ? "bg-emerald-500/90" :
-                        listing.status === "reserved" ? "bg-amber-500/90" :
-                        listing.status === "sold" ? "bg-red-500/90" :
-                        "bg-slate-500/90"
-                      }`}>
-                        {listing.status}
-                      </span>
-                    </div>
-                  </div>
-                  <div className="flex flex-1 flex-col p-4">
-                    <h3 className="line-clamp-1 text-sm font-semibold text-brand-header/90 group-hover:text-brand-accent transition-colors">
-                      {listing.title}
-                    </h3>
-                    <p className="mt-auto text-lg font-black text-brand-header pt-2">${listing.price}</p>
-                  </div>
-                </Link>
+                <ListingCard key={listing.id} listing={listing} />
               ))}
             </div>
           ) : (
