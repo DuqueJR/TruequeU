@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { Link } from "react-router-dom"
 import { useStore } from "../store/useStore"
-import { apiGetFavorites } from "../api/client"
+import { apiGetFavorites, apiRemoveFavorite } from "../api/client"
 import type { Favorite } from "../types"
 
 export default function FavoritesPage() {
@@ -13,7 +13,6 @@ export default function FavoritesPage() {
   useEffect(() => {
     if (!user) return
     let cancelled = false
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true)
     setError(null)
     apiGetFavorites()
@@ -33,11 +32,11 @@ export default function FavoritesPage() {
     return (
       <div className="flex-1 flex items-center justify-center px-6 py-24">
         <div className="text-center max-w-md">
-          <h2 className="text-xl font-bold text-white mb-4">Sign in to see your favorites</h2>
-          <p className="text-slate-400 mb-6">Favorites are saved per account.</p>
+          <h2 className="text-xl font-bold text-brand-header mb-4">Sign in to see your favorites</h2>
+          <p className="text-brand-text mb-6">Favorites are saved per account.</p>
           <Link
             to="/login"
-            className="inline-block px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all"
+            className="inline-block px-6 py-3 bg-brand-accent hover:bg-brand-accent/90 text-white font-bold rounded-xl transition-all"
           >
             Sign in
           </Link>
@@ -50,8 +49,8 @@ export default function FavoritesPage() {
     return (
       <div className="flex-1 flex items-center justify-center px-6 py-24">
         <div className="text-center">
-          <div className="inline-block h-10 w-10 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
-          <p className="mt-4 text-slate-400">Loading favorites...</p>
+          <div className="inline-block h-10 w-10 animate-spin rounded-full border-2 border-brand-accent border-t-transparent" />
+          <p className="mt-4 text-brand-text">Loading favorites...</p>
         </div>
       </div>
     )
@@ -62,7 +61,7 @@ export default function FavoritesPage() {
       <div className="flex-1 flex items-center justify-center px-6 py-24">
         <div className="text-center max-w-md">
           <p className="text-red-400 mb-4">{error}</p>
-          <Link to="/listings" className="text-indigo-400 hover:text-indigo-300 font-medium">
+          <Link to="/listings" className="text-brand-accent hover:text-brand-accent/80 font-medium">
             Back to listings
           </Link>
         </div>
@@ -73,10 +72,10 @@ export default function FavoritesPage() {
   return (
     <div className="flex-1 min-w-0">
       <div className="mx-auto max-w-7xl px-6 pt-8 pb-4">
-        <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight mb-2">
+        <h1 className="text-2xl md:text-3xl font-black text-brand-header tracking-tight mb-2">
           My favorites
         </h1>
-        <p className="text-slate-400 text-sm">
+        <p className="text-brand-text text-sm">
           {favorites.length > 0
             ? `${favorites.length} ${favorites.length === 1 ? "item" : "items"} saved`
             : "Save listings to see them here."}
@@ -85,11 +84,11 @@ export default function FavoritesPage() {
 
       {favorites.length === 0 ? (
         <div className="mx-auto max-w-7xl px-6 py-12">
-          <div className="bg-[#1e293b]/20 border border-slate-800 rounded-2xl p-12 text-center">
-            <p className="text-slate-400 mb-4">You have no favorites yet. Browse listings and mark the ones you're interested in.</p>
+          <div className="bg-brand-surface/20 border border-brand-border rounded-2xl p-12 text-center">
+            <p className="text-brand-text mb-4">You have no favorites yet. Browse listings and mark the ones you're interested in.</p>
             <Link
               to="/listings"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all"
+              className="inline-flex items-center gap-2 px-6 py-3 bg-brand-accent hover:bg-brand-accent/90 text-white font-bold rounded-xl transition-all"
             >
               View all listings
               <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -105,7 +104,7 @@ export default function FavoritesPage() {
               <Link
                 key={fav.id}
                 to={`/listing/${fav.listingId}`}
-                className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-800 bg-[#1e293b]/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-indigo-500/50 hover:shadow-[0_8px_30px_rgb(0,0,0,0.4)] p-5"
+                className="group relative flex flex-col overflow-hidden rounded-2xl border border-brand-border bg-brand-surface/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-brand-accent/50 hover:shadow-[0_8px_30px_rgb(0,0,0,0.4)] p-5"
               >
                 <span className={`self-start px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider mb-3 ${
                   fav.listingState === "available" ? "bg-emerald-500/20 text-emerald-400" :
@@ -114,11 +113,11 @@ export default function FavoritesPage() {
                 }`}>
                   {fav.listingState}
                 </span>
-                <h3 className="line-clamp-2 text-sm font-semibold text-slate-100 group-hover:text-indigo-400 transition-colors mb-2">
+                <h3 className="line-clamp-2 text-sm font-semibold text-brand-header/90 group-hover:text-brand-accent transition-colors mb-2">
                   {fav.listingTitle}
                 </h3>
-                <span className="text-xs text-slate-500 mb-2">{fav.listingCategory}</span>
-                <p className="mt-auto text-lg font-black text-white">${fav.listingPrice}</p>
+                <span className="text-xs text-brand-text/70 mb-2">{fav.listingCategory}</span>
+                <p className="mt-auto text-lg font-black text-brand-header">${fav.listingPrice}</p>
               </Link>
             ))}
           </section>
