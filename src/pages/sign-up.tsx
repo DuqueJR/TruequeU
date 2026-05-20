@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { useStore } from "../store/useStore"
-import { apiRegister, ApiError } from "../api/client"
+import { apiRegister, apiGetCurrentUser, ApiError } from "../api/client"
 import { validatePassword } from "../services/auth.service"
 
 export default function SignupPage() {
@@ -38,13 +38,14 @@ export default function SignupPage() {
 
     setLoading(true)
     try {
-      const user = await apiRegister({
+      await apiRegister({
         userName: formData.email.split("@")[0],
         email: formData.email,
         password: formData.password,
         fullName: formData.fullName,
       })
-      login(user)
+      const fullUser = await apiGetCurrentUser()
+      login(fullUser)
       navigate("/")
     } catch (err) {
       if (err instanceof ApiError) {

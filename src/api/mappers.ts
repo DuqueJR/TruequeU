@@ -89,8 +89,8 @@ export function mapListingFromApi(raw: Record<string, unknown>): Listing {
 
 export function mapUserFromApi(raw: Record<string, unknown>): User {
   return {
-    id: String(raw.Id ?? raw.id ?? ''),
-    username: String(raw.UserName ?? raw.username ?? ''),
+    id: String(raw.Id ?? raw.id ?? raw.userId ?? raw.UserId ?? ''),
+    username: String(raw.UserName ?? raw.username ?? raw.userName ?? ''),
     email: String(raw.Email ?? raw.email ?? ''),
     fullName: raw.FullName != null ? String(raw.FullName) : (raw.fullName != null ? String(raw.fullName) : undefined),
     program: raw.Program != null ? String(raw.Program) : (raw.program != null ? String(raw.program) : undefined),

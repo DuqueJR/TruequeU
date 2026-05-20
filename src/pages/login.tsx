@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import { useStore } from "../store/useStore"
-import { apiLogin, ApiError } from "../api/client"
+import { apiLogin, apiGetCurrentUser, ApiError } from "../api/client"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -16,8 +16,9 @@ export default function LoginPage() {
     setError("")
     setLoading(true)
     try {
-      const user = await apiLogin(email, password)
-      login(user)
+      await apiLogin(email, password)
+      const fullUser = await apiGetCurrentUser()
+      login(fullUser)
       navigate("/")
     } catch (err) {
       if (err instanceof ApiError) {
