@@ -1,30 +1,55 @@
 @import "tailwindcss";
 
-/* En Tailwind v4, puedes definir tus variables de marca 
-  directamente aquí para usarlas como clases (ej. text-brand-accent)
-*/
 @theme {
   --color-brand-bg: var(--bg);
   --color-brand-text: var(--text);
   --color-brand-header: var(--text-h);
   --color-brand-accent: var(--accent);
+  --color-brand-surface: var(--surface);
+  --color-brand-surface-secondary: var(--surface-secondary);
+  --color-brand-border: var(--border);
+  --color-brand-input: var(--input-bg);
+  --color-brand-input-border: var(--input-border);
 }
 
 :root {
   --bg: #ffffff;
-  --text: #6b6375;
-  --text-h: #08060d;
-  --accent: #aa3bff;
-  --border: #e5e4e7;
+  --text: #475569;
+  --text-h: #0f172a;
+  --accent: #6366f1;
+  --border: #e2e8f0;
+  --surface: #f1f5f9;
+  --surface-secondary: #e2e8f0;
+  --input-bg: #ffffff;
+  --input-border: #cbd5e1;
+  color-scheme: light;
+}
+
+.dark {
+  --bg: #0f172a;
+  --text: #9ca3af;
+  --text-h: #f3f4f6;
+  --accent: #818cf8;
+  --border: #1e293b;
+  --surface: #1e293b;
+  --surface-secondary: #334155;
+  --input-bg: #0f172a;
+  --input-border: #334155;
+  color-scheme: dark;
 }
 
 @media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0f172a; 
+  :root:not(.light) {
+    --bg: #0f172a;
     --text: #9ca3af;
     --text-h: #f3f4f6;
-    --accent: #c084fc;
+    --accent: #818cf8;
     --border: #1e293b;
+    --surface: #1e293b;
+    --surface-secondary: #334155;
+    --input-bg: #0f172a;
+    --input-border: #334155;
+    color-scheme: dark;
   }
 }
 
