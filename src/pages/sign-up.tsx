@@ -66,16 +66,16 @@ export default function SignupPage() {
 
   return (
     <div className="flex-1 flex items-center justify-center px-6 py-12 relative overflow-hidden">
-      <div className="absolute top-1/4 -left-20 w-80 h-80 bg-indigo-600/10 rounded-full blur-[120px] pointer-events-none"></div>
+      <div className="absolute top-1/4 -left-20 w-80 h-80 bg-brand-accent/10 rounded-full blur-[120px] pointer-events-none"></div>
       <div className="absolute bottom-1/4 -right-20 w-80 h-80 bg-purple-600/10 rounded-full blur-[120px] pointer-events-none"></div>
 
       <div className="w-full max-w-xl relative z-10">
-        <div className="bg-[#1e293b]/40 backdrop-blur-2xl border border-slate-800 p-8 md:p-12 rounded-[2.5rem] shadow-2xl">
+        <div className="bg-brand-surface/40 backdrop-blur-2xl border border-brand-border p-8 md:p-12 rounded-[2.5rem] shadow-2xl">
           <div className="mb-10 text-center md:text-left">
-            <h2 className="text-4xl font-black text-white tracking-tighter mb-3">
-              Join the community<span className="text-indigo-500">.</span>
+            <h2 className="text-4xl font-black text-brand-header tracking-tighter mb-3">
+              Join the community<span className="text-brand-accent">.</span>
             </h2>
-            <p className="text-slate-400 font-medium">
+            <p className="text-brand-text font-medium">
               Start trading items with students from your campus.
             </p>
           </div>
@@ -87,7 +87,7 @@ export default function SignupPage() {
               </div>
             )}
             <div className="md:col-span-2">
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">
+              <label className="block text-xs font-bold text-brand-text/70 uppercase tracking-widest mb-2 ml-1">
                 Full Name
               </label>
               <input
@@ -96,13 +96,13 @@ export default function SignupPage() {
                 required
                 value={formData.fullName}
                 onChange={handleChange}
-                className="w-full bg-slate-900/60 border border-slate-700 text-white rounded-2xl px-4 py-3.5 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none transition-all"
+                className="w-full bg-brand-input/60 border border-brand-input-border text-brand-header rounded-2xl px-4 py-3.5 focus:ring-2 focus:ring-brand-accent/50 focus:outline-none transition-all"
                 placeholder="John Doe"
               />
             </div>
 
             <div className="md:col-span-2">
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">
+              <label className="block text-xs font-bold text-brand-text/70 uppercase tracking-widest mb-2 ml-1">
                 University Email
               </label>
               <input
@@ -111,13 +111,13 @@ export default function SignupPage() {
                 required
                 value={formData.email}
                 onChange={handleChange}
-                className="w-full bg-slate-900/60 border border-slate-700 text-white rounded-2xl px-4 py-3.5 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none transition-all"
+                className="w-full bg-brand-input/60 border border-brand-input-border text-brand-header rounded-2xl px-4 py-3.5 focus:ring-2 focus:ring-brand-accent/50 focus:outline-none transition-all"
                 placeholder="user@uni.edu"
               />
             </div>
 
             <div className="md:col-span-1">
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">
+              <label className="block text-xs font-bold text-brand-text/70 uppercase tracking-widest mb-2 ml-1">
                 Password
               </label>
               <input
@@ -126,16 +126,16 @@ export default function SignupPage() {
                 required
                 value={formData.password}
                 onChange={handleChange}
-                className="w-full bg-slate-900/60 border border-slate-700 text-white rounded-2xl px-4 py-3.5 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none transition-all"
+                className="w-full bg-brand-input/60 border border-brand-input-border text-brand-header rounded-2xl px-4 py-3.5 focus:ring-2 focus:ring-brand-accent/50 focus:outline-none transition-all"
                 placeholder="Min. 8 chars, uppercase, number and symbol"
               />
-              <p className="text-slate-500 text-[10px] mt-1 ml-1">
+              <p className="text-brand-text/70 text-[10px] mt-1 ml-1">
                 Min. 8 characters, 1 uppercase, 1 lowercase, 1 number and 1 symbol
               </p>
             </div>
 
             <div className="md:col-span-1">
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">
+              <label className="block text-xs font-bold text-brand-text/70 uppercase tracking-widest mb-2 ml-1">
                 Confirm Password
               </label>
               <input
@@ -144,7 +144,7 @@ export default function SignupPage() {
                 required
                 value={formData.confirmPassword}
                 onChange={handleChange}
-                className="w-full bg-slate-900/60 border border-slate-700 text-white rounded-2xl px-4 py-3.5 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none transition-all"
+                className="w-full bg-brand-input/60 border border-brand-input-border text-brand-header rounded-2xl px-4 py-3.5 focus:ring-2 focus:ring-brand-accent/50 focus:outline-none transition-all"
                 placeholder="••••••••"
               />
             </div>
@@ -153,16 +153,16 @@ export default function SignupPage() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-60 disabled:cursor-not-allowed text-white font-black py-4 rounded-2xl transition-all shadow-xl shadow-indigo-500/20 active:scale-[0.99]"
+                className="w-full bg-brand-accent hover:bg-brand-accent/90 disabled:opacity-60 disabled:cursor-not-allowed text-white font-black py-4 rounded-2xl transition-all shadow-xl shadow-brand-accent/20 active:scale-[0.99]"
               >
                 {loading ? "Creating account..." : "Create Account"}
               </button>
             </div>
           </form>
 
-          <p className="text-center mt-10 text-slate-400 text-sm">
+          <p className="text-center mt-10 text-brand-text text-sm">
             Already have an account?{" "}
-            <Link to="/login" className="text-white font-bold hover:text-indigo-400 transition-colors underline underline-offset-4">
+            <Link to="/login" className="text-brand-header font-bold hover:text-brand-accent transition-colors underline underline-offset-4">
               Sign In
             </Link>
           </p>

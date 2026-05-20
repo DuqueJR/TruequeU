@@ -39,12 +39,12 @@ export default function ReportForm({ reportedUserId, reportedListingId, onClose 
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
-      <div className="bg-[#1e293b] border border-slate-700 p-8 rounded-3xl shadow-2xl w-full max-w-lg mx-4">
+      <div className="bg-brand-surface border border-brand-border p-8 rounded-3xl shadow-2xl w-full max-w-lg mx-4">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-black text-white">
+          <h2 className="text-xl font-black text-brand-header">
             {success ? "Report Submitted" : "Report"}
           </h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors">
+          <button onClick={onClose} className="text-brand-text hover:text-brand-header transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -56,7 +56,7 @@ export default function ReportForm({ reportedUserId, reportedListingId, onClose 
             <p className="text-emerald-400 mb-4">Your report has been submitted. Our team will review it.</p>
             <button
               onClick={onClose}
-              className="px-6 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white font-bold rounded-xl transition-all"
+              className="px-6 py-2.5 bg-brand-accent hover:bg-brand-accent/90 text-white font-bold rounded-xl transition-all"
             >
               Close
             </button>
@@ -68,7 +68,7 @@ export default function ReportForm({ reportedUserId, reportedListingId, onClose 
             )}
 
             <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">
+              <label className="block text-xs font-bold text-brand-text/70 uppercase tracking-widest mb-2 ml-1">
                 Reason
               </label>
               <input
@@ -78,12 +78,12 @@ export default function ReportForm({ reportedUserId, reportedListingId, onClose 
                 value={reason}
                 onChange={(e) => setReason(e.target.value)}
                 placeholder="e.g. Inappropriate content, Scam, Spam"
-                className="w-full bg-slate-900/60 border border-slate-700 text-white rounded-2xl px-4 py-3.5 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none transition-all"
+                className="w-full bg-brand-input/60 border border-brand-input-border text-brand-header rounded-2xl px-4 py-3.5 focus:ring-2 focus:ring-brand-accent/50 focus:outline-none transition-all"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">
+              <label className="block text-xs font-bold text-brand-text/70 uppercase tracking-widest mb-2 ml-1">
                 Comment
               </label>
               <textarea
@@ -93,7 +93,7 @@ export default function ReportForm({ reportedUserId, reportedListingId, onClose 
                 value={comment}
                 onChange={(e) => setComment(e.target.value)}
                 placeholder="Describe the issue in detail..."
-                className="w-full bg-slate-900/60 border border-slate-700 text-white rounded-2xl px-4 py-3.5 focus:ring-2 focus:ring-indigo-500/50 focus:outline-none transition-all resize-none"
+                className="w-full bg-brand-input/60 border border-brand-input-border text-brand-header rounded-2xl px-4 py-3.5 focus:ring-2 focus:ring-brand-accent/50 focus:outline-none transition-all resize-none"
               />
             </div>
 
@@ -101,7 +101,7 @@ export default function ReportForm({ reportedUserId, reportedListingId, onClose 
               <button
                 type="button"
                 onClick={onClose}
-                className="flex-1 px-4 py-3 bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium rounded-xl border border-slate-700 transition-all"
+                className="flex-1 px-4 py-3 bg-brand-surface-secondary hover:bg-brand-surface-secondary/80 text-brand-header/80 font-medium rounded-xl border border-brand-input-border transition-all"
               >
                 Cancel
               </button>

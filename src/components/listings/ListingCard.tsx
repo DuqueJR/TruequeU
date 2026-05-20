@@ -32,9 +32,9 @@ export default function ListingCard({ listing }: { listing: Listing }) {
   const primaryImage = listing.images[0]?.url || 'https://via.placeholder.com/400'
 
   return (
-    <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-slate-800 bg-[#1e293b]/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-indigo-500/50 hover:shadow-[0_8px_30px_rgb(0,0,0,0.4)]">
+    <div className="group relative flex flex-col overflow-hidden rounded-2xl border border-brand-border bg-brand-surface/50 backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-brand-accent/50 hover:shadow-[0_8px_30px_rgb(0,0,0,0.4)]">
 
-      <div className="aspect-square w-full overflow-hidden bg-slate-800 relative">
+      <div className="aspect-square w-full overflow-hidden bg-brand-surface-secondary relative">
         <img
           className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-110"
           src={primaryImage}
@@ -56,7 +56,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
           onClick={handleFavoriteClick}
           aria-label={!user ? "Sign in to save favorites" : isFavorite ? "Remove from favorites" : "Add to favorites"}
           className={`absolute top-3 right-3 flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-md transition-all hover:scale-110 ${
-            isFavorite ? "bg-red-500 text-white" : "bg-slate-900/60 text-white hover:bg-red-500"
+            isFavorite ? "bg-red-500 text-white" : "bg-brand-input/60 text-brand-header hover:bg-red-500"
           }`}
         >
           <svg
@@ -73,10 +73,10 @@ export default function ListingCard({ listing }: { listing: Listing }) {
 
       <div className="flex flex-1 flex-col p-4">
         <div className="mb-1 flex items-start justify-between gap-2">
-          <h3 className="line-clamp-1 text-sm font-semibold text-slate-100 group-hover:text-indigo-400 transition-colors">
+          <h3 className="line-clamp-1 text-sm font-semibold text-brand-header/90 group-hover:text-brand-accent transition-colors">
             {listing.title}
           </h3>
-          <p className="whitespace-nowrap text-lg font-black text-white">
+          <p className="whitespace-nowrap text-lg font-black text-brand-header">
             ${listing.price.toLocaleString()}
           </p>
         </div>
@@ -93,7 +93,7 @@ export default function ListingCard({ listing }: { listing: Listing }) {
           </Link>
           <Link
             to={`/listing/${listing.id}`}
-            className="px-4 flex items-center justify-center rounded-xl bg-slate-800 text-xs font-bold text-slate-300 transition-all hover:bg-slate-700 hover:text-white border border-slate-700"
+            className="px-4 flex items-center justify-center rounded-xl bg-brand-surface-secondary text-brand-header/80 text-xs font-bold transition-all hover:bg-brand-surface-secondary/80 hover:text-brand-header border border-brand-input-border"
           >
             Details
           </Link>

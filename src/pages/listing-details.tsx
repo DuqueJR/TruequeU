@@ -22,6 +22,7 @@ export default function ListingDetailsPage() {
   const [seller, setSeller] = useState<User | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  const [errorStatus, setErrorStatus] = useState<number | null>(null)
   const [activeImage, setActiveImage] = useState(0)
   const [isFavorite, setIsFavorite] = useState(false)
   const [statusUpdating, setStatusUpdating] = useState(false)
@@ -32,6 +33,7 @@ export default function ListingDetailsPage() {
     let cancelled = false
     setLoading(true)
     setError(null)
+    setErrorStatus(null)
 
     apiGetListing(id)
       .then((l) => {
@@ -46,8 +48,15 @@ export default function ListingDetailsPage() {
       })
       .catch((err) => {
         if (cancelled) return
-        if (err instanceof ApiError && err.status === 404) {
-          setError("Listing not found.")
+        if (err instanceof ApiError) {
+          setErrorStatus(err.status)
+          if (err.status === 404) {
+            setError("Listing not found.")
+          } else if (err.status === 401) {
+            setError("You need to sign in to view this listing.")
+          } else {
+            setError(err.message)
+          }
         } else {
           setError(err instanceof Error ? err.message : "Error loading listing")
         }
@@ -95,8 +104,33 @@ export default function ListingDetailsPage() {
     return (
       <div className="flex-1 flex items-center justify-center px-6 py-24">
         <div className="text-center">
-          <div className="inline-block h-10 w-10 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
-          <p className="mt-4 text-slate-400">Loading listing...</p>
+          <div className="inline-block h-10 w-10 animate-spin rounded-full border-2 border-brand-accent border-t-transparent" />
+          <p className="mt-4 text-brand-text">Loading listing...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (errorStatus === 401) {
+    return (
+      <div className="flex-1 flex items-center justify-center px-6 py-24">
+        <div className="text-center max-w-md">
+          <h2 className="text-2xl font-bold text-brand-header mb-4">Sign in required</h2>
+          <p className="text-brand-text mb-6">{error}</p>
+          <div className="flex gap-4 justify-center">
+            <Link
+              to="/login"
+              className="px-6 py-3 bg-brand-accent hover:bg-brand-accent/90 text-white font-bold rounded-xl transition-all"
+            >
+              Sign In
+            </Link>
+            <Link
+              to="/signup"
+              className="px-6 py-3 bg-brand-surface-secondary hover:bg-brand-surface-secondary/80 text-brand-header/80 font-bold rounded-xl border border-brand-input-border transition-all"
+            >
+              Sign Up
+            </Link>
+          </div>
         </div>
       </div>
     )
@@ -106,9 +140,11 @@ export default function ListingDetailsPage() {
     return (
       <div className="flex-1 flex items-center justify-center px-6 py-24">
         <div className="text-center max-w-md">
-          <h2 className="text-2xl font-bold text-white mb-4">Listing not found</h2>
-          <p className="text-slate-400 mb-6">{error || "This listing does not exist or has been removed."}</p>
-          <Link to="/listings" className="text-indigo-400 hover:text-indigo-300 font-bold">
+          <h2 className="text-2xl font-bold text-brand-header mb-4">
+            {errorStatus === 404 ? "Listing not found" : "Something went wrong"}
+          </h2>
+          <p className="text-brand-text mb-6">{error || "This listing does not exist or has been removed."}</p>
+          <Link to="/listings" className="text-brand-accent hover:text-brand-accent/80 font-bold">
             Browse all listings
           </Link>
         </div>
@@ -116,12 +152,12 @@ export default function ListingDetailsPage() {
     )
   }
 
-  const primaryImage = listing.images.find((i) => i.isPrimary)?.url || listing.images[0]?.url
+  const displayImage = listing.images[activeImage]?.url || listing.images[0]?.url
 
   return (
     <div className="flex-1 px-6 py-8 md:py-12">
       <div className="mx-auto max-w-7xl">
-        <Link to="/listings" className="inline-flex items-center text-slate-400 hover:text-white mb-8 transition-colors group">
+        <Link to="/listings" className="inline-flex items-center text-brand-text hover:text-brand-header mb-8 transition-colors group">
           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
@@ -130,15 +166,15 @@ export default function ListingDetailsPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           <div className="space-y-4">
-            <div className="aspect-square rounded-[2.5rem] overflow-hidden border border-slate-800 bg-slate-900/50">
-              {primaryImage ? (
+            <div className="aspect-square rounded-[2.5rem] overflow-hidden border border-brand-border bg-brand-input/50">
+              {displayImage ? (
                 <img
-                  src={primaryImage}
+                  src={displayImage}
                   alt={listing.title}
                   className="w-full h-full object-cover"
                 />
               ) : (
-                <div className="w-full h-full flex items-center justify-center text-slate-600">
+                <div className="w-full h-full flex items-center justify-center text-brand-text/70">
                   No image
                 </div>
               )}
@@ -150,7 +186,7 @@ export default function ListingDetailsPage() {
                     key={img.id}
                     onClick={() => setActiveImage(index)}
                     className={`w-24 h-24 rounded-2xl overflow-hidden border-2 transition-all shrink-0 ${
-                      activeImage === index ? "border-indigo-500 scale-95" : "border-transparent opacity-50 hover:opacity-100"
+                      activeImage === index ? "border-brand-accent scale-95" : "border-transparent opacity-50 hover:opacity-100"
                     }`}
                   >
                     <img src={img.url} className="w-full h-full object-cover" alt={img.altText || listing.title} />
@@ -164,8 +200,8 @@ export default function ListingDetailsPage() {
             <div className="mb-6">
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <span className="text-indigo-400 text-sm font-bold uppercase tracking-widest">{listing.category}</span>
-                  <h1 className="text-4xl md:text-5xl font-black text-white tracking-tighter mt-2 mb-4">
+                  <span className="text-brand-accent text-sm font-bold uppercase tracking-widest">{listing.category}</span>
+                  <h1 className="text-4xl md:text-5xl font-black text-brand-header tracking-tighter mt-2 mb-4">
                     {listing.title}
                   </h1>
                 </div>
@@ -175,7 +211,7 @@ export default function ListingDetailsPage() {
                     onClick={handleToggleFavorite}
                     aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
                     className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full transition-all hover:scale-110 ${
-                      isFavorite ? "bg-red-500 text-white" : "bg-slate-800 text-slate-400 hover:bg-red-500/20 hover:text-red-400"
+                      isFavorite ? "bg-red-500 text-white" : "bg-brand-surface-secondary text-brand-text hover:bg-red-500/20 hover:text-red-400"
                     }`}
                   >
                     <svg
@@ -191,7 +227,7 @@ export default function ListingDetailsPage() {
                 )}
               </div>
               <div className="flex items-center gap-4 flex-wrap">
-                <span className="text-3xl font-black text-white">${listing.price}</span>
+                <span className="text-3xl font-black text-brand-header">${listing.price}</span>
                 <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase ${
                   listing.status === "available" ? "bg-emerald-500/20 text-emerald-400" :
                   listing.status === "reserved" ? "bg-amber-500/20 text-amber-400" :
@@ -200,22 +236,22 @@ export default function ListingDetailsPage() {
                 }`}>
                   {listing.status}
                 </span>
-                <span className="px-3 py-1 rounded-full bg-slate-800 text-slate-300 text-xs font-bold uppercase">
+                <span className="px-3 py-1 rounded-full bg-brand-surface-secondary text-brand-header/80 text-xs font-bold uppercase">
                   {listing.condition}
                 </span>
-                <span className="text-slate-500 text-xs">
+                <span className="text-brand-text/70 text-xs">
                   {listing.campusLocation}
                 </span>
               </div>
             </div>
 
-            <p className="text-slate-400 leading-relaxed mb-8 text-lg">
+            <p className="text-brand-text leading-relaxed mb-8 text-lg">
               {listing.description}
             </p>
 
             {isOwner && listing.status !== "disabled" && listing.status !== "sold" && (
-              <div className="bg-[#1e293b]/40 border border-slate-800 p-4 rounded-2xl mb-6">
-                <p className="text-xs text-slate-500 uppercase tracking-widest mb-3">Manage listing status</p>
+              <div className="bg-brand-surface/40 border border-brand-border p-4 rounded-2xl mb-6">
+                <p className="text-xs text-brand-text/70 uppercase tracking-widest mb-3">Manage listing status</p>
                 <div className="flex gap-2 flex-wrap">
                   {listing.status !== "available" && (
                     <button
@@ -247,17 +283,17 @@ export default function ListingDetailsPage() {
               </div>
             )}
 
-            <div className="bg-[#1e293b]/40 backdrop-blur-xl border border-slate-800 p-6 rounded-3xl mb-8 flex items-center justify-between">
+            <div className="bg-brand-surface/40 backdrop-blur-xl border border-brand-border p-6 rounded-3xl mb-8 flex items-center justify-between">
               <div className="flex items-center gap-4">
                 <img
                   src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${listing.ownerId}`}
                   alt={seller?.username || "Seller"}
-                  className="w-14 h-14 rounded-full bg-indigo-500/20 p-1"
+                  className="w-14 h-14 rounded-full bg-brand-accent/20 p-1"
                 />
                 <div>
-                  <h4 className="text-white font-bold">{seller?.fullName || seller?.username || "Unknown"}</h4>
-                  <p className="text-slate-400 text-sm">{seller?.program || listing.campusLocation}</p>
-                  <p className="text-slate-500 text-xs">Rating: {seller?.rating ?? "—"}</p>
+                  <h4 className="text-brand-header font-bold">{seller?.fullName || seller?.username || "Unknown"}</h4>
+                  <p className="text-brand-text text-sm">{seller?.program || listing.campusLocation}</p>
+                  <p className="text-brand-text/70 text-xs">Rating: {seller?.rating ?? "—"}</p>
                 </div>
               </div>
             </div>
@@ -276,7 +312,7 @@ export default function ListingDetailsPage() {
                 <button
                   type="button"
                   onClick={() => setShowReport(true)}
-                  className="flex items-center justify-center gap-3 bg-slate-800 hover:bg-slate-700 text-white font-black py-4 rounded-2xl transition-all border border-slate-700 active:scale-[0.98]"
+                  className="flex items-center justify-center gap-3 bg-brand-surface-secondary hover:bg-brand-surface-secondary/80 text-brand-header font-black py-4 rounded-2xl transition-all border border-brand-input-border active:scale-[0.98]"
                 >
                   Report
                 </button>

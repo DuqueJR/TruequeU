@@ -1,15 +1,15 @@
 import { useState, useEffect, useCallback } from "react"
-import { useParams, useSearchParams, Link } from "react-router-dom"
+import { useParams, useSearchParams } from "react-router-dom"
 import { useStore } from "../store/useStore"
 import {
   apiGetConversations,
   apiGetConversation,
-  apiCreateConversation,
   apiGetMessages,
   apiSendMessage,
   apiGetUser,
 } from "../api/client"
 import type { Conversation, Message as MessageType, User } from "../types"
+import AuthGuard from "../components/AuthGuard"
 
 export default function ChatPage() {
   const { chatId } = useParams()
@@ -48,35 +48,36 @@ export default function ChatPage() {
       apiGetConversation(chatId).then(async (conv) => {
         setActiveConv(conv)
         const partnerId = conv.buyerId === currentUser?.id ? conv.sellerId : conv.buyerId
-        setPartner(await apiGetUser(partnerId).catch(() => null))
+        apiGetUser(partnerId).then(setPartner)
       })
-    } else if (listingId && currentUser) {
-      apiCreateConversation({ listingId, content: "Hi, I'm interested in your listing!" })
-        .then((conv) => {
-          fetchConversations()
-          window.history.replaceState(null, "", `/chat/${conv.id}`)
-          setActiveConv(conv)
-          const partnerId = conv.buyerId === currentUser.id ? conv.sellerId : conv.buyerId
-          return apiGetUser(partnerId)
-        })
-        .then((u) => {
-          if (u) setPartner(u as User)
-        })
-        .catch(() => {})
+      return
     }
-  }, [chatId, searchParams, currentUser, fetchConversations])
+
+    if (listingId && currentUser) {
+      const existing = conversations.find((c) => c.listingId === listingId)
+      if (existing) {
+        setActiveConv(existing)
+        const partnerId = existing.buyerId === currentUser.id ? existing.sellerId : existing.buyerId
+        apiGetUser(partnerId).then(setPartner)
+        return
+      }
+    }
+
+    setActiveConv(null)
+    setPartner(null)
+  }, [chatId, searchParams, currentUser, conversations])
 
   useEffect(() => {
     if (!activeConv) return
     setLoadingMessages(true)
     apiGetMessages(activeConv.id)
-      .then(setMessages)
-      .catch(() => setMessages([]))
+      .then((data) => {
+        setMessages(data)
+      })
       .finally(() => setLoadingMessages(false))
   }, [activeConv])
 
-  const handleSendMessage = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const handleSend = async () => {
     if (!newMessage.trim() || !currentUser || !activeConv) return
     const msg = await apiSendMessage(activeConv.id, newMessage.trim())
     setMessages((prev) => [...prev, msg])
@@ -84,145 +85,123 @@ export default function ChatPage() {
   }
 
   if (!currentUser) {
-    return (
-      <div className="flex-1 flex items-center justify-center px-6 py-12">
-        <div className="text-center">
-          <p className="text-slate-400 mb-4">Log in to see your chats.</p>
-          <Link to="/login" className="text-indigo-400 font-bold hover:text-indigo-300">
-            Log In
-          </Link>
-        </div>
-      </div>
-    )
+    return <AuthGuard heading="Sign in to see your chats" description="Chat with sellers and buyers about your listings." />
   }
 
   return (
-    <div className="flex-1 flex flex-col md:flex-row h-[calc(100vh-73px)] overflow-hidden bg-[#0f172a]">
-      <aside className="w-full md:w-80 border-r border-slate-800 flex flex-col bg-slate-900/20 shrink-0">
-        <div className="p-6 border-b border-slate-800">
-          <h2 className="text-xl font-black text-white tracking-tighter">Messages</h2>
+    <div className="flex-1 flex flex-col md:flex-row h-[calc(100vh-73px)] overflow-hidden bg-brand-bg">
+      <aside className="w-full md:w-80 border-r border-brand-border flex flex-col bg-brand-surface/20 shrink-0">
+        <div className="p-6 border-b border-brand-border">
+          <h2 className="text-xl font-black text-brand-header tracking-tighter">Messages</h2>
         </div>
-        <div className="flex-1 overflow-y-auto p-4 space-y-2">
+        <div className="flex-1 overflow-y-auto">
           {loadingConvs ? (
-            <div className="flex justify-center py-8">
-              <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
+            <div className="flex justify-center py-12">
+              <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-brand-accent border-t-transparent" />
             </div>
           ) : conversations.length === 0 ? (
-            <p className="text-slate-500 text-sm p-4">
-              You don't have any chats yet. Browse listings and contact sellers to start a conversation.
-            </p>
+            <div className="p-6 text-center">
+              <p className="text-brand-text text-sm">No conversations yet.</p>
+              <p className="text-brand-text/70 text-xs mt-1">Contact a seller to start a chat.</p>
+            </div>
           ) : (
             conversations.map((conv) => {
-              const isActive = chatId === conv.id
+              const isActive = activeConv?.id === conv.id
+              const isRead = conv.lastMessageAt != null
               return (
-                <Link
+                <button
                   key={conv.id}
-                  to={`/chat/${conv.id}`}
-                  className={`block p-4 rounded-2xl transition-colors ${
-                    isActive ? "bg-indigo-600/20 border border-indigo-500/50" : "hover:bg-slate-800/50"
+                  onClick={() => {
+                    setActiveConv(conv)
+                    const pid = conv.buyerId === currentUser.id ? conv.sellerId : conv.buyerId
+                    apiGetUser(pid).then(setPartner)
+                  }}
+                  className={`w-full text-left p-4 border-b border-brand-border transition-colors ${
+                    isActive ? "bg-brand-accent/10 border-l-2 border-l-brand-accent" : "hover:bg-brand-surface/50"
                   }`}
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-slate-800 flex items-center justify-center text-slate-400 text-xs font-bold">
-                      {conv.buyerId === currentUser.id ? "S" : "B"}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-white font-bold truncate text-sm">
-                        {conv.lastMessageContent || "Conversation"}
-                      </p>
-                      <p className="text-slate-400 text-xs truncate">
-                        {conv.lastMessageContent || "No messages yet"}
-                      </p>
-                    </div>
-                    {conv.unreadCount > 0 && (
-                      <span className="bg-indigo-600 text-white text-xs rounded-full px-2 py-0.5 font-bold">
-                        {conv.unreadCount}
-                      </span>
-                    )}
-                  </div>
-                </Link>
+                  <p className="text-sm font-semibold text-brand-header/90 truncate">
+                    {conv.lastMessageContent || "No messages yet"}
+                  </p>
+                  <p className="text-xs text-brand-text mt-1">
+                    {isRead ? new Date(conv.lastMessageAt!).toLocaleDateString() : "New"}
+                  </p>
+                </button>
               )
             })
           )}
         </div>
       </aside>
 
-      <main className="flex-1 flex flex-col min-w-0">
+      <div className="flex-1 flex flex-col min-w-0">
         {activeConv && partner ? (
           <>
-            <header className="p-4 border-b border-slate-800 bg-[#1e293b]/30 flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-3">
-                <img
-                  src={`https://api.dicebear.com/7.x/avataaars/svg?seed=${partner.id}`}
-                  className="w-10 h-10 rounded-full border border-slate-700"
-                  alt=""
-                />
-                <div>
-                  <h3 className="text-white font-bold text-sm">{partner.fullName || partner.username}</h3>
-                </div>
-              </div>
-            </header>
-
-            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-[#0f172a]">
+            <div className="p-4 border-b border-brand-border bg-brand-surface/30">
+              <p className="text-sm font-bold text-brand-header">{partner.fullName || partner.username}</p>
+            </div>
+            <div className="flex-1 overflow-y-auto p-4 space-y-4">
               {loadingMessages ? (
-                <div className="flex justify-center py-8">
-                  <div className="h-6 w-6 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
+                <div className="flex justify-center py-12">
+                  <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-brand-accent border-t-transparent" />
                 </div>
               ) : messages.length === 0 ? (
-                <p className="text-slate-500 text-sm text-center py-8">
-                  Send a message to start a conversation
-                </p>
+                <p className="text-brand-text/70 text-center py-12">No messages yet. Start the conversation.</p>
               ) : (
-                messages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={`flex ${msg.senderId === currentUser.id ? "justify-end" : "justify-start"}`}
-                  >
-                    <div
-                      className={`max-w-[70%] p-4 rounded-2xl shadow-xl ${
-                        msg.senderId === currentUser.id
-                          ? "bg-indigo-600 text-white rounded-tr-none"
-                          : "bg-slate-800 text-slate-200 rounded-tl-none border border-slate-700"
-                      }`}
-                    >
-                      <p className="text-sm leading-relaxed">{msg.content}</p>
-                      <p className="text-[10px] mt-2 opacity-60">
-                        {new Date(msg.sentAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                      </p>
+                messages.map((msg) => {
+                  const isMine = msg.senderId === currentUser.id
+                  return (
+                    <div key={msg.id} className={`flex ${isMine ? "justify-end" : "justify-start"}`}>
+                      <div
+                        className={`max-w-[70%] px-4 py-2 rounded-2xl ${
+                          isMine
+                            ? "bg-brand-accent text-white rounded-br-md"
+                            : "bg-brand-surface-secondary text-brand-header/80 rounded-bl-md"
+                        }`}
+                      >
+                        <p className="text-sm">{msg.content}</p>
+                        <p className="text-[10px] mt-1 opacity-70">
+                          {new Date(msg.sentAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))
+                  )
+                })
               )}
             </div>
-
-            <footer className="p-4 bg-slate-900/50 border-t border-slate-800 shrink-0">
-              <form onSubmit={handleSendMessage} className="max-w-4xl mx-auto flex gap-3">
+            <div className="p-4 border-t border-brand-border bg-brand-surface/20">
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault()
+                  handleSend()
+                }}
+                className="flex gap-2"
+              >
                 <input
                   type="text"
                   value={newMessage}
                   onChange={(e) => setNewMessage(e.target.value)}
-                  placeholder="Write a message..."
-                  className="flex-1 bg-slate-800 border border-slate-700 text-white rounded-2xl px-6 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                  placeholder="Type a message..."
+                  className="flex-1 bg-brand-input/50 border border-brand-input-border text-brand-header rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-brand-accent/50 text-sm"
                 />
                 <button
                   type="submit"
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white px-6 py-3 rounded-2xl font-bold transition-all"
+                  disabled={!newMessage.trim()}
+                  className="bg-brand-accent hover:bg-brand-accent/90 disabled:opacity-50 text-white font-bold px-5 py-2.5 rounded-xl transition-all"
                 >
                   Send
                 </button>
               </form>
-            </footer>
+            </div>
           </>
         ) : (
-          <div className="flex-1 flex items-center justify-center text-slate-500">
-            {chatId ? (
-              <p>Chat not found.</p>
-            ) : (
-              <p>Select a conversation or contact a seller to start a chat.</p>
-            )}
+          <div className="flex-1 flex items-center justify-center">
+            <div className="text-center">
+              <p className="text-brand-text text-lg mb-2">Select a conversation</p>
+              <p className="text-brand-text/70 text-sm">Pick a chat from the sidebar to start messaging.</p>
+            </div>
           </div>
         )}
-      </main>
+      </div>
     </div>
   )
 }

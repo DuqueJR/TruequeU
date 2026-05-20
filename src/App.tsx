@@ -9,6 +9,7 @@ import Listings from "./pages/listings"
 import Favorites from "./pages/favorites"
 import Login from "./pages/login"
 import Navbar from "./components/layout/Navbar"
+import ThemeProvider from "./components/ThemeProvider"
 import Signup from "./pages/sign-up"
 import Chat from "./pages/chat"
 import Profile from "./pages/profile"
@@ -27,25 +28,27 @@ function App() {
   }, [])
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <Navbar />
-      <main className="flex-1">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/listings" element={<Listings />} />
-          <Route path="/favorites" element={<Favorites />} />
-          <Route path="/listing/:id" element={<ListingDetail />} />
-          <Route path="/create" element={<CreateListing />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/signup" element={<Signup />} />
-          <Route path="/chat" element={<Chat />} />
-          <Route path="/chat/:chatId" element={<Chat />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/admin" element={<AdminDashboard />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </main>
-    </div>
+    <ThemeProvider>
+      <div className="flex min-h-screen flex-col">
+        <Navbar />
+        <main className="flex-1">
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/listings" element={<Listings />} />
+            <Route path="/favorites" element={<Favorites />} />
+            <Route path="/listing/:id" element={<ListingDetail />} />
+            <Route path="/create" element={<CreateListing />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/signup" element={<Signup />} />
+            <Route path="/chat" element={<Chat />} />
+            <Route path="/chat/:chatId" element={<Chat />} />
+            <Route path="/profile" element={<Profile />} />
+            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </main>
+      </div>
+    </ThemeProvider>
   )
 }
 

@@ -80,8 +80,8 @@ export default function ListingsPage() {
     return (
       <div className="flex-1 flex items-center justify-center px-6 py-24">
         <div className="text-center">
-          <div className="inline-block h-10 w-10 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
-          <p className="mt-4 text-slate-400">Loading listings...</p>
+          <div className="inline-block h-10 w-10 animate-spin rounded-full border-2 border-brand-accent border-t-transparent" />
+          <p className="mt-4 text-brand-text">Loading listings...</p>
         </div>
       </div>
     )
@@ -94,7 +94,7 @@ export default function ListingsPage() {
           <p className="text-red-400 mb-4">{error}</p>
           <button
             onClick={fetchListings}
-            className="text-indigo-400 hover:text-indigo-300 font-medium"
+            className="text-brand-accent hover:text-brand-accent/80 font-medium"
           >
             Retry
           </button>
@@ -106,27 +106,27 @@ export default function ListingsPage() {
   return (
     <div className="flex-1 min-w-0">
       <div className="mx-auto max-w-7xl px-6 pt-8 pb-4">
-        <h1 className="text-2xl md:text-3xl font-black text-white tracking-tight mb-2">
+        <h1 className="text-2xl md:text-3xl font-black text-brand-header tracking-tight mb-2">
           All listings
         </h1>
-        <p className="text-slate-400 text-sm">
+        <p className="text-brand-text text-sm">
           Explore all that the community has to offer.
         </p>
       </div>
 
       <div className="mx-auto max-w-7xl px-6 pb-4">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 rounded-2xl border border-slate-800 bg-[#1e293b]/30 p-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3 rounded-2xl border border-brand-border bg-brand-surface/30 p-4">
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => { setSearchQuery(e.target.value); setPage(1) }}
             placeholder="Search..."
-            className="col-span-1 rounded-xl bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+            className="col-span-1 rounded-xl bg-brand-input/60 border border-brand-input-border px-3 py-2 text-sm text-brand-header focus:outline-none focus:ring-2 focus:ring-brand-accent/50"
           />
           <select
             value={category}
             onChange={(e) => { setCategory(e.target.value); setPage(1) }}
-            className="rounded-xl bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+            className="rounded-xl bg-brand-input/60 border border-brand-input-border px-3 py-2 text-sm text-brand-header focus:outline-none focus:ring-2 focus:ring-brand-accent/50"
           >
             <option value="">All categories</option>
             {CATEGORIES.map((c) => (
@@ -136,7 +136,7 @@ export default function ListingsPage() {
           <select
             value={condition}
             onChange={(e) => { setCondition(e.target.value); setPage(1) }}
-            className="rounded-xl bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+            className="rounded-xl bg-brand-input/60 border border-brand-input-border px-3 py-2 text-sm text-brand-header focus:outline-none focus:ring-2 focus:ring-brand-accent/50"
           >
             <option value="">All conditions</option>
             {CONDITIONS.map((c) => (
@@ -146,7 +146,7 @@ export default function ListingsPage() {
           <select
             value={status}
             onChange={(e) => { setStatus(e.target.value); setPage(1) }}
-            className="rounded-xl bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+            className="rounded-xl bg-brand-input/60 border border-brand-input-border px-3 py-2 text-sm text-brand-header focus:outline-none focus:ring-2 focus:ring-brand-accent/50"
           >
             <option value="">All states</option>
             {STATUSES.map((s) => (
@@ -159,7 +159,7 @@ export default function ListingsPage() {
             value={minPrice}
             onChange={(e) => { setMinPrice(e.target.value); setPage(1) }}
             placeholder="Min price"
-            className="rounded-xl bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+            className="rounded-xl bg-brand-input/60 border border-brand-input-border px-3 py-2 text-sm text-brand-header focus:outline-none focus:ring-2 focus:ring-brand-accent/50"
           />
           <input
             type="number"
@@ -167,12 +167,12 @@ export default function ListingsPage() {
             value={maxPrice}
             onChange={(e) => { setMaxPrice(e.target.value); setPage(1) }}
             placeholder="Max price"
-            className="rounded-xl bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+            className="rounded-xl bg-brand-input/60 border border-brand-input-border px-3 py-2 text-sm text-brand-header focus:outline-none focus:ring-2 focus:ring-brand-accent/50"
           />
           <select
             value={postedDate}
             onChange={(e) => { setPostedDate(e.target.value); setPage(1) }}
-            className="rounded-xl bg-slate-900/60 border border-slate-700 px-3 py-2 text-sm text-white focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+            className="rounded-xl bg-brand-input/60 border border-brand-input-border px-3 py-2 text-sm text-brand-header focus:outline-none focus:ring-2 focus:ring-brand-accent/50"
           >
             {DATES.map((d) => (
               <option key={d.value} value={d.value}>{d.label}</option>
@@ -181,7 +181,7 @@ export default function ListingsPage() {
           <button
             type="button"
             onClick={clearFilters}
-            className="rounded-xl bg-slate-800 border border-slate-700 px-3 py-2 text-sm font-medium text-slate-200 hover:bg-slate-700"
+            className="rounded-xl bg-brand-surface-secondary border border-brand-input-border px-3 py-2 text-sm font-medium text-brand-header/80 hover:bg-brand-surface-secondary/80"
           >
             Clear filters
           </button>
@@ -190,7 +190,7 @@ export default function ListingsPage() {
 
       {loading && (
         <div className="flex justify-center py-4">
-          <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-indigo-500 border-t-transparent" />
+          <div className="inline-block h-6 w-6 animate-spin rounded-full border-2 border-brand-accent border-t-transparent" />
         </div>
       )}
 
@@ -208,17 +208,17 @@ export default function ListingsPage() {
           <button
             onClick={() => setPage((p) => Math.max(1, p - 1))}
             disabled={page === 1}
-            className="px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 text-sm text-slate-300 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-4 py-2 rounded-xl bg-brand-surface-secondary border border-brand-input-border text-sm text-brand-header/80 hover:bg-brand-surface-secondary/80 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Previous
           </button>
-          <span className="text-slate-400 text-sm">
+          <span className="text-brand-text text-sm">
             Page {paged.page} of {paged.totalPages}
           </span>
           <button
             onClick={() => setPage((p) => Math.min(paged.totalPages, p + 1))}
             disabled={page >= paged.totalPages}
-            className="px-4 py-2 rounded-xl bg-slate-800 border border-slate-700 text-sm text-slate-300 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-4 py-2 rounded-xl bg-brand-surface-secondary border border-brand-input-border text-sm text-brand-header/80 hover:bg-brand-surface-secondary/80 disabled:opacity-40 disabled:cursor-not-allowed"
           >
             Next
           </button>

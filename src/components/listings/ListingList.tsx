@@ -11,9 +11,9 @@ export default function ListingList({ listings, emptyMessage = "No hay listings 
     if (listings.length === 0) {
       return (
         <div className="mx-auto max-w-7xl px-6 py-12">
-          <div className="bg-[#1e293b]/20 border border-slate-800 rounded-2xl p-12 text-center">
-            <p className="text-slate-400 mb-2">{emptyMessage}</p>
-            <p className="text-slate-500 text-sm">
+          <div className="bg-brand-surface/20 border border-brand-border rounded-2xl p-12 text-center">
+            <p className="text-brand-text mb-2">{emptyMessage}</p>
+            <p className="text-brand-text/70 text-sm">
               Intenta con otra búsqueda o crea un nuevo listing.
             </p>
           </div>
